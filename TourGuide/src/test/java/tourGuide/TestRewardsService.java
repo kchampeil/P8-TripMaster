@@ -1,17 +1,12 @@
 package tourGuide;
 
-import static org.junit.Assert.*;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
@@ -19,7 +14,21 @@ import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+@SpringBootTest
 public class TestRewardsService {
+
+	@BeforeAll
+	public static void setUp(){
+		Locale.setDefault(Locale.US);
+	}
 
 	@Test
 	public void userGetRewards() {
@@ -46,7 +55,7 @@ public class TestRewardsService {
 		assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
 	}
 	
-	@Ignore // Needs fixed - can throw ConcurrentModificationException
+	@Disabled // Needs fixed - can throw ConcurrentModificationException
 	@Test
 	public void nearAllAttractions() {
 		GpsUtil gpsUtil = new GpsUtil();
