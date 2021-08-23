@@ -31,13 +31,14 @@ public class TourGuideService {
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
     private final GpsUtil gpsUtil;
     private final RewardsService rewardsService;
-    private final TripPricer tripPricer = new TripPricer();
+    private final TripPricer tripPricer;
     public final Tracker tracker;
     boolean testMode = true;
 
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
+    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, TripPricer tripPricer) {
         this.gpsUtil = gpsUtil;
         this.rewardsService = rewardsService;
+        this.tripPricer = tripPricer;
 
         if (testMode) {
             logger.info("TestMode enabled");

@@ -6,23 +6,41 @@ import gpsUtil.location.VisitedLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tripPricer.Provider;
+import tripPricer.TripPricer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class TestTourGuideService {
+
+    @MockBean
+    private GpsUtil gpsUtilMock;
+
+    @MockBean
+    private RewardsService rewardsServiceMock;
+
+    @MockBean
+    private TripPricer tripPricerMock;
 
     @BeforeAll
     public static void setUp() {
@@ -34,7 +52,7 @@ public class TestTourGuideService {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
@@ -47,7 +65,7 @@ public class TestTourGuideService {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
@@ -69,7 +87,7 @@ public class TestTourGuideService {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
@@ -90,7 +108,7 @@ public class TestTourGuideService {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
@@ -106,7 +124,7 @@ public class TestTourGuideService {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
@@ -120,18 +138,24 @@ public class TestTourGuideService {
 
     @Test
     public void getTripDeals() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtilMock, rewardsServiceMock, tripPricerMock);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+
+        List<Provider> expectedProviderList = new ArrayList<>();
+        expectedProviderList.add(new Provider(user.getUserId(), "Expected Provider1", 123.45));
+        expectedProviderList.add(new Provider(user.getUserId(), "Expected Provider2", 543.32));
+        when(tripPricerMock.getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(expectedProviderList);
 
         List<Provider> providers = tourGuideService.getTripDeals(user);
 
         tourGuideService.tracker.stopTracking();
 
-        assertEquals(5, providers.size());
+        assertEquals(expectedProviderList.size(), providers.size());
+        verify(tripPricerMock, Mockito.times(1))
+                .getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt());
     }
 
 
