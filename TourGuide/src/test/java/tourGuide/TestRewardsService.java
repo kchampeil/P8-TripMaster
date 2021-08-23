@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class TestRewardsService {
@@ -43,7 +43,7 @@ public class TestRewardsService {
         tourGuideService.trackUserLocation(user);
         List<UserReward> userRewards = user.getUserRewards();
         tourGuideService.tracker.stopTracking();
-        assertTrue(userRewards.size() == 1);
+        assertEquals(1, userRewards.size());
     }
 
     @Test
