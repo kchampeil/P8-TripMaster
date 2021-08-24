@@ -10,6 +10,7 @@ import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
@@ -51,7 +52,7 @@ public class RewardsService {
                 if (user.getUserRewards().stream()
                         .noneMatch(reward -> reward.attraction.attractionName.equals(attraction.attractionName))) {
                     if (nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user.getUserId())));
                     }
                 }
             }
@@ -66,8 +67,8 @@ public class RewardsService {
         return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
     }
 
-    private int getRewardPoints(Attraction attraction, User user) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
+    public int getRewardPoints(Attraction attraction, UUID userId) {
+        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, userId);
     }
 
     public double getDistance(Location loc1, Location loc2) {

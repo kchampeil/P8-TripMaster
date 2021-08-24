@@ -6,11 +6,11 @@ import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import tourGuide.dto.NearByAttractionDto;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
@@ -146,16 +146,67 @@ public class TestTourGuideService {
         verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user.getUserId());
     }
 
-    @Disabled // Not yet implemented
     @Test
     public void getNearbyAttractions() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
 
-        List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+        VisitedLocation visitedLocation = new VisitedLocation(
+                user.getUserId(),
+                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                Date.from(Instant.now()));
+        when(gpsUtilMock.getUserLocation(user.getUserId())).thenReturn(visitedLocation);
 
-        assertEquals(5, attractions.size());
+        Attraction attraction1 = new Attraction("MoMA", "New York City",
+                "New York", TestConstants.NYC_LATITUDE, TestConstants.NYC_LONGITUDE);
+        Attraction attraction2 = new Attraction("Louvre", "Paris",
+                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
+        Attraction attraction3 = new Attraction("Orsay", "Paris",
+                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
+        Attraction attraction4 = new Attraction("Quai Branly", "Paris",
+                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
+        Attraction attraction5 = new Attraction("Palais des Beaux Arts", "Lille",
+                "France", TestConstants.LILLE_LATITUDE, TestConstants.LILLE_LONGITUDE);
+        Attraction attraction6 = new Attraction("Musée d'Histoire Naturelle", "Lille",
+                "France", TestConstants.LILLE_LATITUDE, TestConstants.LILLE_LONGITUDE);
+
+        List<Attraction> attractionList = new ArrayList<>();
+        attractionList.add(attraction1);
+        attractionList.add(attraction2);
+        attractionList.add(attraction3);
+        attractionList.add(attraction4);
+        attractionList.add(attraction5);
+        attractionList.add(attraction6);
+
+        when(gpsUtilMock.getAttractions()).thenReturn(attractionList);
+
+        when(rewardsServiceMock.getDistance(attraction1,
+                visitedLocation.location)).thenReturn(TestConstants.DISTANCE_NYC_TO_PARIS_IN_MI);
+        when(rewardsServiceMock.getDistance(attraction2,
+                visitedLocation.location)).thenReturn(Double.valueOf(0));
+        when(rewardsServiceMock.getDistance(attraction3,
+                visitedLocation.location)).thenReturn(Double.valueOf(0));
+        when(rewardsServiceMock.getDistance(attraction4,
+                visitedLocation.location)).thenReturn(Double.valueOf(0));
+        when(rewardsServiceMock.getDistance(attraction5,
+                visitedLocation.location)).thenReturn(TestConstants.DISTANCE_LILLE_TO_PARIS_IN_MI);
+        when(rewardsServiceMock.getDistance(attraction6,
+                visitedLocation.location)).thenReturn(TestConstants.DISTANCE_LILLE_TO_PARIS_IN_MI);
+
+        when(rewardsServiceMock.getRewardPoints(any(), any())).thenReturn(100);
+
+        List<NearByAttractionDto> nearByAttractionDtoList = tourGuideService.getNearByAttractions(visitedLocation);
+
+        assertEquals(5, nearByAttractionDtoList.size());
+        assertEquals("Louvre", nearByAttractionDtoList.get(0).getAttractionName());
+        assertEquals(0D, nearByAttractionDtoList.get(0).getAttractionDistanceFromUser());
+        assertEquals(100, nearByAttractionDtoList.get(0).getAttractionRewardsPoint());
+
+        verify(gpsUtilMock, Mockito.times(1)).getAttractions();
+        verify(rewardsServiceMock, Mockito.atLeast(6))
+                .getDistance(any(), any());
+        verify(rewardsServiceMock, Mockito.times(5)).getRewardPoints(any(), any());
+
     }
 
     @Test
