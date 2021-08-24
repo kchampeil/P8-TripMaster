@@ -52,11 +52,13 @@ public class TourGuideService {
         addShutDownHook();
     }
 
-    public List<UserReward> getUserRewards(User user) {
+    public List<UserReward> getUserRewards(String userName) {
+        User user = this.getUser(userName);
         return user.getUserRewards();
     }
 
-    public VisitedLocation getUserLocation(User user) {
+    public VisitedLocation getUserLocation(String userName) {
+        User user = this.getUser(userName);
         return (user.getVisitedLocations().size() > 0) ?
                 user.getLastVisitedLocation() :
                 trackUserLocation(user);
@@ -76,7 +78,8 @@ public class TourGuideService {
         }
     }
 
-    public List<Provider> getTripDeals(User user) {
+    public List<Provider> getTripDeals(String userName) {
+        User user = this.getUser(userName);
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
         List<Provider> providers = tripPricer.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);

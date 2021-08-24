@@ -27,7 +27,7 @@ public class ITRewardsService {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
 
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-        List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+        List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0).getUserName());
         tourGuideService.tracker.stopTracking();
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());

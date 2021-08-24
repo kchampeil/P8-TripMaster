@@ -70,7 +70,8 @@ public class TestTourGuideService {
                 Date.from(Instant.now()));
         user.addToVisitedLocations(visitedLocation);
 
-        VisitedLocation lastUserLocation = tourGuideService.getUserLocation(user);
+        tourGuideService.addUser(user);
+        VisitedLocation lastUserLocation = tourGuideService.getUserLocation(user.getUserName());
 
         assertEquals(visitedLocation, lastUserLocation);
         assertEquals(user.getUserId(), lastUserLocation.userId);
@@ -89,7 +90,8 @@ public class TestTourGuideService {
                 Date.from(Instant.now()));
         when(gpsUtilMock.getUserLocation(user.getUserId())).thenReturn(visitedLocation);
 
-        VisitedLocation currentUserLocation = tourGuideService.getUserLocation(user);
+        tourGuideService.addUser(user);
+        VisitedLocation currentUserLocation = tourGuideService.getUserLocation(user.getUserName());
 
         assertEquals(visitedLocation, currentUserLocation);
         assertEquals(user.getUserId(), currentUserLocation.userId);
@@ -212,6 +214,7 @@ public class TestTourGuideService {
     public void getTripDeals() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        tourGuideService.addUser(user);
 
         List<Provider> expectedProviderList = new ArrayList<>();
         expectedProviderList.add(new Provider(user.getUserId(), "Expected Provider1", 123.45));
@@ -219,7 +222,7 @@ public class TestTourGuideService {
         when(tripPricerMock.getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(expectedProviderList);
 
-        List<Provider> providers = tourGuideService.getTripDeals(user);
+        List<Provider> providers = tourGuideService.getTripDeals(user.getUserName());
 
         assertEquals(expectedProviderList.size(), providers.size());
         verify(tripPricerMock, Mockito.times(1))

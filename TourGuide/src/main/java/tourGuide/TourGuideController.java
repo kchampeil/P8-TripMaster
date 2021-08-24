@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tourGuide.service.TourGuideService;
-import tourGuide.user.User;
 import tripPricer.Provider;
 
 import java.util.List;
@@ -29,11 +28,11 @@ public class TourGuideController {
 
     @RequestMapping("/getLocation")
     public String getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userName);
         return JsonStream.serialize(visitedLocation.location);
     }
 
-    //  TODO: Change this method to no longer return a List of Attractions.
+    //  DONE: Change this method to no longer return a List of Attractions.
     //  Instead: Get the closest five tourist attractions to the user - no matter how far away they are.
     //  Return a new JSON object that contains:
     // Name of Tourist attraction,
@@ -44,13 +43,13 @@ public class TourGuideController {
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions")
     public String getNearbyAttractions(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userName);
         return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
     }
 
     @RequestMapping("/getRewards")
     public String getRewards(@RequestParam String userName) {
-        return JsonStream.serialize(tourGuideService.getUserRewards(getUser(userName)));
+        return JsonStream.serialize(tourGuideService.getUserRewards(userName));
     }
 
     @RequestMapping("/getAllCurrentLocations")
@@ -70,14 +69,8 @@ public class TourGuideController {
 
     @RequestMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
-        List<Provider> providers = tourGuideService.getTripDeals(getUser(userName));
+        List<Provider> providers = tourGuideService.getTripDeals(userName);
         return JsonStream.serialize(providers);
     }
-
-    //TOASK : ne devrait pas être ailleurs ? (couche service) => les appels à tourGuideService se feraient sur le username
-    private User getUser(String userName) {
-        return tourGuideService.getUser(userName);
-    }
-
 
 }
