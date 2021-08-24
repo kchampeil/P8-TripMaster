@@ -4,6 +4,7 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
+import org.javamoney.moneta.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,12 @@ import tourGuide.dto.NearByAttractionDto;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
+import javax.money.CurrencyUnit;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -80,7 +83,9 @@ public class TourGuideService {
 
     public List<Provider> getTripDeals(String userName) {
         User user = this.getUser(userName);
+
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
+
         List<Provider> providers = tripPricer.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
@@ -97,10 +102,11 @@ public class TourGuideService {
     /**
      * Get the closest five tourist attractions to the user - no matter how far away they are
      *
-     * @param visitedLocation current or last location of user
+     * @param userName of the user we want to find the closest attractions
      * @return a list of NearByAttractionDto
      */
-    public List<NearByAttractionDto> getNearByAttractions(VisitedLocation visitedLocation) {
+    public List<NearByAttractionDto> getNearByAttractions(String userName) {
+        VisitedLocation visitedLocation = this.getUserLocation(userName);
         List<Attraction> nearbyAttractions = gpsUtil.getAttractions()
                 .stream()
                 .sorted(Comparator.comparingDouble(attraction ->
@@ -150,6 +156,7 @@ public class TourGuideService {
             String email = userName + "@tourGuide.com";
             User user = new User(UUID.randomUUID(), userName, phone, email);
             generateUserLocationHistory(user);
+            generateUserPreferences(user);
 
             internalUserMap.put(userName, user);
         });
@@ -158,7 +165,8 @@ public class TourGuideService {
 
     private void generateUserLocationHistory(User user) {
         IntStream.range(0, 3).forEach(i -> {
-            user.addToVisitedLocations(new VisitedLocation(user.getUserId(), new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
+            user.addToVisitedLocations(new VisitedLocation(user.getUserId(),
+                    new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
         });
     }
 
@@ -177,6 +185,25 @@ public class TourGuideService {
     private Date getRandomTime() {
         LocalDateTime localDateTime = LocalDateTime.now().minusDays(new Random().nextInt(30));
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+    }
+
+    private void generateUserPreferences(User user) {
+        UserPreferences userPreferences = new UserPreferences();
+
+        userPreferences.setAttractionProximity(100 + RANDOM.nextInt(Integer.MAX_VALUE - 100));
+        userPreferences.setLowerPricePoint(getRandomPrice(10, userPreferences.getCurrency()));
+        userPreferences.setHighPricePoint(
+                userPreferences.getLowerPricePoint().add(getRandomPrice(10000, userPreferences.getCurrency())));
+        userPreferences.setTripDuration(RANDOM.nextInt(45));
+        userPreferences.setNumberOfAdults(1 + RANDOM.nextInt(3));
+        userPreferences.setNumberOfChildren(RANDOM.nextInt(8));
+        userPreferences.setTicketQuantity(userPreferences.getNumberOfAdults() + userPreferences.getNumberOfChildren());
+
+        user.setUserPreferences(userPreferences);
+    }
+
+    private Money getRandomPrice(int max, CurrencyUnit currencyUnit) {
+        return Money.of(RANDOM.nextInt(max), currencyUnit);
     }
 
 }

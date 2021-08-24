@@ -48,6 +48,8 @@ public class TestTourGuideService {
     @MockBean
     private TripPricer tripPricerMock;
 
+    private User user;
+
     @BeforeAll
     public static void setUp() {
         Locale.setDefault(Locale.US);
@@ -58,12 +60,13 @@ public class TestTourGuideService {
         InternalTestHelper.setInternalUserNumber(0);
         tourGuideService = new TourGuideService(gpsUtilMock, rewardsServiceMock, tripPricerMock);
         tourGuideService.tracker.stopTracking();
+
+        user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
     }
 
     @Test
     public void getUserLocation_WithExistingVisitedLocations() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = new VisitedLocation(
                 user.getUserId(),
                 new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
@@ -82,8 +85,6 @@ public class TestTourGuideService {
     @Test
     public void getUserLocation_WithoutExistingVisitedLocations() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-
         VisitedLocation visitedLocation = new VisitedLocation(
                 user.getUserId(),
                 new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
@@ -101,7 +102,7 @@ public class TestTourGuideService {
 
     @Test
     public void addUser() {
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
         tourGuideService.addUser(user);
@@ -117,7 +118,6 @@ public class TestTourGuideService {
     @Test
     public void getAllUsers() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
         tourGuideService.addUser(user);
@@ -131,8 +131,6 @@ public class TestTourGuideService {
 
     @Test
     public void trackUser() {
-
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
         VisitedLocation visitedLocation = new VisitedLocation(
                 user.getUserId(),
@@ -151,12 +149,13 @@ public class TestTourGuideService {
     @Test
     public void getNearbyAttractions() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        tourGuideService.addUser(user);
 
         VisitedLocation visitedLocation = new VisitedLocation(
                 user.getUserId(),
                 new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
                 Date.from(Instant.now()));
+        user.addToVisitedLocations(visitedLocation);
         when(gpsUtilMock.getUserLocation(user.getUserId())).thenReturn(visitedLocation);
 
         Attraction attraction1 = new Attraction("MoMA", "New York City",
@@ -197,7 +196,7 @@ public class TestTourGuideService {
 
         when(rewardsServiceMock.getRewardPoints(any(), any())).thenReturn(100);
 
-        List<NearByAttractionDto> nearByAttractionDtoList = tourGuideService.getNearByAttractions(visitedLocation);
+        List<NearByAttractionDto> nearByAttractionDtoList = tourGuideService.getNearByAttractions(user.getUserName());
 
         assertEquals(5, nearByAttractionDtoList.size());
         assertEquals("Louvre", nearByAttractionDtoList.get(0).getAttractionName());
@@ -213,7 +212,6 @@ public class TestTourGuideService {
     @Test
     public void getTripDeals() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         tourGuideService.addUser(user);
 
         List<Provider> expectedProviderList = new ArrayList<>();
