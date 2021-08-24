@@ -51,11 +51,11 @@ public class User {
     }
 
     public void setLatestLocationTimestamp(Date latestLocationTimestamp) {
-        this.latestLocationTimestamp = latestLocationTimestamp;
+        this.latestLocationTimestamp = latestLocationTimestamp != null ? new Date(latestLocationTimestamp.getTime()) : null;
     }
 
     public Date getLatestLocationTimestamp() {
-        return latestLocationTimestamp;
+        return latestLocationTimestamp != null ? new Date(latestLocationTimestamp.getTime()) : null;
     }
 
     public void addToVisitedLocations(VisitedLocation visitedLocation) {

@@ -6,6 +6,7 @@ import gpsUtil.location.VisitedLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import rewardCentral.RewardCentral;
@@ -32,7 +33,8 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class TestRewardsService {
-    //KC à @Autowired
+
+    @Autowired
     private RewardsService rewardsService;
 
     @MockBean
@@ -40,9 +42,6 @@ public class TestRewardsService {
 
     @MockBean
     private RewardCentral rewardCentralMock;
-
-    @MockBean
-    private TripPricer tripPricerMock;
 
     @MockBean
     private TourGuideService tourGuideServiceMock;
@@ -53,8 +52,7 @@ public class TestRewardsService {
     }
 
     @Test
-    public void userGetRewards() { // KC plutôt calculateRewards ?
-        rewardsService = new RewardsService(gpsUtilMock, rewardCentralMock);
+    public void userGetRewards() { // KC plutôt calculateRewards ? TOASK
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         Attraction attraction1 = new Attraction("MoMA", "New York City",
@@ -90,8 +88,7 @@ public class TestRewardsService {
 
     @Test
     public void isWithinAttractionProximity() {
-        //GpsUtil gpsUtil = new GpsUtil();
-        rewardsService = new RewardsService(gpsUtilMock, rewardCentralMock);
+
         Attraction attraction1 = new Attraction("MoMA", "New York City",
                 "New York", TestConstants.NYC_LATITUDE, TestConstants.NYC_LONGITUDE);
         assertTrue(rewardsService.isWithinAttractionProximity(attraction1, attraction1));

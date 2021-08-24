@@ -78,7 +78,7 @@ public class TourGuideService {
 
     public List<Provider> getTripDeals(User user) {
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
-        List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
+        List<Provider> providers = tripPricer.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
@@ -135,7 +135,8 @@ public class TourGuideService {
      * Methods Below: For Internal Testing
      *
      **********************************************************************************/
-    private static final String tripPricerApiKey = "test-server-api-key";
+    private static final String TRIP_PRICER_API_KEY = "test-server-api-key";
+    private static final Random RANDOM = new Random();
     // Database connection will be used for external users, but for testing purposes internal users are provided and stored in memory
     private final Map<String, User> internalUserMap = new HashMap<>();
 
@@ -161,13 +162,13 @@ public class TourGuideService {
     private double generateRandomLongitude() {
         double leftLimit = -180;
         double rightLimit = 180;
-        return leftLimit + new Random().nextDouble() * (rightLimit - leftLimit);
+        return leftLimit + RANDOM.nextDouble() * (rightLimit - leftLimit);
     }
 
     private double generateRandomLatitude() {
         double leftLimit = -85.05112878;
         double rightLimit = 85.05112878;
-        return leftLimit + new Random().nextDouble() * (rightLimit - leftLimit);
+        return leftLimit + RANDOM.nextDouble() * (rightLimit - leftLimit);
     }
 
     private Date getRandomTime() {

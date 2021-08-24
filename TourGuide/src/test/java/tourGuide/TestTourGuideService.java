@@ -203,8 +203,7 @@ public class TestTourGuideService {
         assertEquals(100, nearByAttractionDtoList.get(0).getAttractionRewardsPoint());
 
         verify(gpsUtilMock, Mockito.times(1)).getAttractions();
-        verify(rewardsServiceMock, Mockito.atLeast(6))
-                .getDistance(any(), any());
+        verify(rewardsServiceMock, Mockito.atLeast(6)).getDistance(any(), any());
         verify(rewardsServiceMock, Mockito.times(5)).getRewardPoints(any(), any());
 
     }
