@@ -10,13 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import rewardCentral.RewardCentral;
-import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.testConstants.TestConstants;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
-import tripPricer.TripPricer;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,7 +50,7 @@ public class TestRewardsService {
     }
 
     @Test
-    public void userGetRewards() { // KC plutôt calculateRewards ? TOASK
+    public void userGetRewards() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         Attraction attraction1 = new Attraction("MoMA", "New York City",
@@ -96,23 +94,6 @@ public class TestRewardsService {
         Attraction attraction2 = new Attraction("Orsay", "Paris",
                 "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
         assertFalse(rewardsService.isWithinAttractionProximity(attraction2, attraction1));
-    }
-
-    @Test
-    // TOASK plus un test d'intégration ? ==> à mettre dans une autre classe IT ou à passer en TU ?
-    public void nearAllAttractions() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-        rewardsService.setProximityBuffer(Integer.MAX_VALUE);
-
-        InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
-
-        rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-        List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
-        tourGuideService.tracker.stopTracking();
-
-        assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
     }
 
 }

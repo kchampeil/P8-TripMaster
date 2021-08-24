@@ -14,7 +14,7 @@ public class TourGuideModule {
 		return new GpsUtil();
 	}
 
-	/* KC : unactivated to mock  the other RewardsService bean -> TOASK
+	/* unactivated to mock  the other RewardsService bean
 	@Bean
 	public RewardsService getRewardsService() {
 		return new RewardsService(getGpsUtil(), getRewardCentral());
