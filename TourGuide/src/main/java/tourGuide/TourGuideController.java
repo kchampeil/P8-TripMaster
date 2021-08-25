@@ -2,6 +2,7 @@ package tourGuide;
 
 import com.jsoniter.output.JsonStream;
 import gpsUtil.location.VisitedLocation;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ public class TourGuideController {
         return "Greetings from TourGuide!";
     }
 
+    @ApiOperation(value = "Get the most recent location for the user corresponding to the given userName")
     @RequestMapping("/getLocation")
     public String getLocation(@RequestParam String userName) {
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(userName);
@@ -41,16 +43,19 @@ public class TourGuideController {
     // The distance in miles between the user's location and each of the attractions.
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
+    @ApiOperation(value = "Get the closest five tourist attractions to the user - no matter how far away they are")
     @RequestMapping("/getNearbyAttractions")
     public String getNearbyAttractions(@RequestParam String userName) {
         return JsonStream.serialize(tourGuideService.getNearByAttractions(userName));
     }
 
+    @ApiOperation(value = "Get a list of user's rewards")
     @RequestMapping("/getRewards")
     public String getRewards(@RequestParam String userName) {
         return JsonStream.serialize(tourGuideService.getUserRewards(userName));
     }
 
+    @ApiOperation(value = "Get a list of every user's most recent location")
     @RequestMapping("/getAllCurrentLocations")
     public String getAllCurrentLocations() {
         // TODO: Get a list of every user's most recent location as JSON
@@ -66,6 +71,7 @@ public class TourGuideController {
         return JsonStream.serialize("");
     }
 
+    @ApiOperation(value = "Get a list of of trip deals (providers)")
     @RequestMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
         List<Provider> providers = tourGuideService.getTripDeals(userName);
