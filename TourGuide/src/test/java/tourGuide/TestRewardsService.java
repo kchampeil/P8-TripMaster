@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import rewardCentral.RewardCentral;
+import tourGuide.constants.TestConstants;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
-import tourGuide.testConstants.TestConstants;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 

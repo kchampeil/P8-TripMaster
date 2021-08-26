@@ -1,4 +1,4 @@
-package tourGuide.testConstants;
+package tourGuide.constants;
 
 public class TestConstants {
     public static final double PARIS_LATITUDE = 48.856614;

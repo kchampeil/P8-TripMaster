@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -112,6 +113,8 @@ class TestTourGuideController {
 
         UserPreferencesDto userPreferencesDto = new UserPreferencesDto("john", userPreferences);
 
+        when(tourGuideServiceMock.setUserPreferences(any(UserPreferencesDto.class)))
+                .thenThrow(new Exception(USER_DOES_NOT_EXIST));
         //TOASK
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +123,7 @@ class TestTourGuideController {
                 .andExpect(result -> assertTrue(Objects.requireNonNull(result
                         .getResolvedException()).getMessage().contains(USER_DOES_NOT_EXIST)));
 
-        verify(tourGuideServiceMock, Mockito.times(0)).setUserPreferences(userPreferencesDto);
+        verify(tourGuideServiceMock, Mockito.times(1)).setUserPreferences(any(UserPreferencesDto.class));
 
     }
 }

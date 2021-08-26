@@ -52,6 +52,7 @@ public class ITRewardsService {
 
         assertEquals(5, providers.size());
         IntStream.range(0, 5).forEach(i -> {
+            //TOASK : aléatoirement faux puisque TripPricer ne prend pas en compte les lower/higher prices
             assertTrue(lowerPrice <= providers.get(i).price);
             assertTrue(higherPrice >= providers.get(i).price);
         });
