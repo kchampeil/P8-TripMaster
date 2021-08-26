@@ -4,6 +4,7 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
+import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,14 +12,17 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import tourGuide.dto.NearByAttractionDto;
+import tourGuide.dto.UserPreferencesDto;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.testConstants.TestConstants;
 import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
+import javax.money.Monetary;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +31,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -49,10 +54,21 @@ public class TestTourGuideService {
     private TripPricer tripPricerMock;
 
     private User user;
+    private static UserPreferences userPreferences;
 
     @BeforeAll
     public static void setUp() {
         Locale.setDefault(Locale.US);
+
+        userPreferences = new UserPreferences();
+        userPreferences.setAttractionProximity(10);
+        userPreferences.setNumberOfChildren(3);
+        userPreferences.setNumberOfAdults(2);
+        userPreferences.setTripDuration(10);
+        userPreferences.setTicketQuantity(5);
+        userPreferences.setCurrency(Monetary.getCurrency("USD"));
+        userPreferences.setLowerPricePoint(Money.of(5, userPreferences.getCurrency()));
+        userPreferences.setHighPricePoint(Money.of(100, userPreferences.getCurrency()));
     }
 
     @BeforeEach
@@ -227,4 +243,23 @@ public class TestTourGuideService {
                 .getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt());
     }
 
+    @Test
+    void setUserPreferences_WithNoUser_ThrowsException() {
+
+        UserPreferencesDto userPreferencesDto = new UserPreferencesDto("john", userPreferences);
+
+        assertThrows(Exception.class, () -> tourGuideService.setUserPreferences(userPreferencesDto));
+    }
+
+    @Test
+    void setUserPreferences_WithSuccess() throws Exception {
+
+        tourGuideService.addUser(user);
+        UserPreferencesDto userPreferencesDto = new UserPreferencesDto(user.getUserName(), userPreferences);
+
+        UserPreferencesDto userPreferencesDtoReturned = tourGuideService.setUserPreferences(userPreferencesDto);
+
+        assertEquals(userPreferencesDto.getUserName(), userPreferencesDtoReturned.getUserName());
+        assertEquals(userPreferencesDto.getUserPreferences(), userPreferencesDtoReturned.getUserPreferences());
+    }
 }

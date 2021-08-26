@@ -3,15 +3,28 @@ package tourGuide;
 import com.jsoniter.output.JsonStream;
 import gpsUtil.location.VisitedLocation;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import tourGuide.dto.UserPreferencesDto;
 import tourGuide.service.TourGuideService;
 import tripPricer.Provider;
 
+import javax.validation.Valid;
 import java.util.List;
 
+import static tourGuide.constants.TourGuideExceptionConstants.INVALID_INPUT;
+
+@Slf4j
 @RestController
 public class TourGuideController {
 
@@ -78,4 +91,25 @@ public class TourGuideController {
         return JsonStream.serialize(providers);
     }
 
+    @ApiOperation(value = "Set given user preferences for the user")
+    @PostMapping(value = "/userPreferences", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserPreferencesDto> setUserPreferences(@RequestBody @Valid UserPreferencesDto userPreferencesDto,
+                                                                 BindingResult bindingResult) {
+        log.debug("POST request to set UserPreferences received");
+
+        if (bindingResult.hasErrors()) {
+            log.debug("bindingResult has errors");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_INPUT);
+        }
+
+        try {
+            UserPreferencesDto addedUserPreferencesDto = tourGuideService.setUserPreferences(userPreferencesDto);
+            return new ResponseEntity<>(addedUserPreferencesDto, HttpStatus.CREATED);
+
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
+        }
+
+    }
 }

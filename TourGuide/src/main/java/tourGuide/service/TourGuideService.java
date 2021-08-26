@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.NearByAttractionDto;
+import tourGuide.dto.UserPreferencesDto;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
@@ -30,6 +31,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static tourGuide.constants.TourGuideExceptionConstants.USER_DOES_NOT_EXIST;
 
 @Service
 public class TourGuideService {
@@ -129,6 +132,21 @@ public class TourGuideService {
             nearByAttractionDtoList.add(nearByAttractionDTO);
         }
         return nearByAttractionDtoList;
+    }
+
+    public UserPreferencesDto setUserPreferences(UserPreferencesDto userPreferencesDto) throws Exception {
+
+        User user = this.getUser(userPreferencesDto.getUserName());
+
+        if (user != null) {
+            logger.info("Set user preferences for: " + userPreferencesDto.getUserName());
+            user.setUserPreferences(userPreferencesDto.getUserPreferences());
+            return new UserPreferencesDto(user.getUserName(), user.getUserPreferences());
+
+        } else {
+            throw new Exception(USER_DOES_NOT_EXIST);
+        }
+
     }
 
     private void addShutDownHook() {
