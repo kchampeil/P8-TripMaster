@@ -8,6 +8,7 @@ import org.javamoney.moneta.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tourGuide.dto.CurrentLocationDto;
 import tourGuide.dto.NearByAttractionDto;
 import tourGuide.dto.UserPreferencesDto;
 import tourGuide.helper.InternalTestHelper;
@@ -163,6 +164,21 @@ public class TourGuideService {
         } else {
             throw new Exception(USER_DOES_NOT_EXIST);
         }
+    }
+
+    /**
+     * Get a list of every user's most recent location gathered from their stored location history
+     *
+     * @return the list of every user's most recent location
+     */
+    public List<CurrentLocationDto> getAllCurrentLocations() {
+        List<CurrentLocationDto> allCurrentLocationsDto = new ArrayList<>();
+        this.getAllUsers().stream()
+                .filter(user -> user.getLastVisitedLocation() != null)
+                .forEach(user -> allCurrentLocationsDto
+                        .add(new CurrentLocationDto(user.getUserId().toString(), user.getLastVisitedLocation().location)));
+
+        return allCurrentLocationsDto;
     }
 
     private void addShutDownHook() {

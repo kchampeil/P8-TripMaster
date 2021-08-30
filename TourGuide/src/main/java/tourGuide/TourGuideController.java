@@ -71,7 +71,7 @@ public class TourGuideController {
     @ApiOperation(value = "Get a list of every user's most recent location")
     @RequestMapping("/getAllCurrentLocations")
     public String getAllCurrentLocations() {
-        // TODO: Get a list of every user's most recent location as JSON
+        // DONE: Get a list of every user's most recent location as JSON
         //- Note: does not use gpsUtil to query for their current location,
         //        but rather gathers the user's current location from their stored location history.
         //
@@ -81,7 +81,7 @@ public class TourGuideController {
         //        ...
         //     }
 
-        return JsonStream.serialize("");
+        return JsonStream.serialize(tourGuideService.getAllCurrentLocations());
     }
 
     @ApiOperation(value = "Get a list of of trip deals (providers)")

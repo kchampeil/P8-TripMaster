@@ -5,8 +5,8 @@ import tourGuide.user.UserPreferences;
 
 public interface IUserPreferencesService {
 
-    public UserPreferencesDto getUserPreferencesDtoFromUserPreferences(UserPreferences userPreferences);
+    UserPreferencesDto getUserPreferencesDtoFromUserPreferences(UserPreferences userPreferences);
 
-    public UserPreferences getUserPreferencesFromUserPreferencesDto(UserPreferencesDto userPreferencesDto);
+    UserPreferences getUserPreferencesFromUserPreferencesDto(UserPreferencesDto userPreferencesDto);
 
 }

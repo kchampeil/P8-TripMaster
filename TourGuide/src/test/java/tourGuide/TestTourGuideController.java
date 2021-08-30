@@ -1,7 +1,7 @@
 package tourGuide;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.javamoney.moneta.Money;
+import gpsUtil.location.Location;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,11 +10,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import tourGuide.dto.CurrentLocationDto;
 import tourGuide.dto.UserPreferencesDto;
 import tourGuide.service.TourGuideService;
-import tourGuide.user.UserPreferences;
 
-import javax.money.Monetary;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -22,10 +23,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static tourGuide.constants.TestConstants.LILLE_LATITUDE;
+import static tourGuide.constants.TestConstants.LILLE_LONGITUDE;
+import static tourGuide.constants.TestConstants.NYC_LATITUDE;
+import static tourGuide.constants.TestConstants.NYC_LONGITUDE;
+import static tourGuide.constants.TestConstants.PARIS_LATITUDE;
+import static tourGuide.constants.TestConstants.PARIS_LONGITUDE;
 import static tourGuide.constants.TourGuideExceptionConstants.INVALID_INPUT;
 import static tourGuide.constants.TourGuideExceptionConstants.USER_DOES_NOT_EXIST;
 
@@ -40,35 +48,23 @@ class TestTourGuideController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static UserPreferences userPreferences;
     private static UserPreferencesDto userPreferencesDto;
 
     @BeforeAll
     public static void setUp() {
         Locale.setDefault(Locale.US);
 
-        userPreferences = new UserPreferences();
-        userPreferences.setAttractionProximity(10);
-        userPreferences.setNumberOfChildren(3);
-        userPreferences.setNumberOfAdults(2);
-        userPreferences.setTripDuration(10);
-        userPreferences.setTicketQuantity(5);
-        userPreferences.setCurrency(Monetary.getCurrency("USD"));
-        userPreferences.setLowerPricePoint(Money.of(5, userPreferences.getCurrency()));
-        userPreferences.setHighPricePoint(Money.of(100, userPreferences.getCurrency()));
-
         userPreferencesDto = new UserPreferencesDto();
-        userPreferencesDto.setAttractionProximity(userPreferences.getAttractionProximity());
-        userPreferencesDto.setNumberOfChildren(userPreferences.getNumberOfChildren());
-        userPreferencesDto.setNumberOfAdults(userPreferences.getNumberOfAdults());
-        userPreferencesDto.setTripDuration(userPreferences.getTripDuration());
-        userPreferencesDto.setTicketQuantity(userPreferences.getTicketQuantity());
-        userPreferencesDto.setCurrency(userPreferences.getCurrency().toString());
-        userPreferencesDto.setLowerPricePoint(userPreferences.getLowerPricePoint().getNumber().intValue());
-        userPreferencesDto.setHighPricePoint(userPreferences.getHighPricePoint().getNumber().intValue());
+        userPreferencesDto.setAttractionProximity(10);
+        userPreferencesDto.setNumberOfChildren(3);
+        userPreferencesDto.setNumberOfAdults(2);
+        userPreferencesDto.setTripDuration(10);
+        userPreferencesDto.setTicketQuantity(5);
+        userPreferencesDto.setCurrency("USD");
+        userPreferencesDto.setLowerPricePoint(5);
+        userPreferencesDto.setHighPricePoint(100);
     }
-
-    //@Disabled
+    
     @Test
     void setUserPreferences_WithSuccess() throws Exception {
 
@@ -120,5 +116,32 @@ class TestTourGuideController {
                         .getResolvedException()).getMessage().contains(USER_DOES_NOT_EXIST)));
 
         verify(tourGuideServiceMock, Mockito.times(1)).setUserPreferences(any(UserPreferencesDto.class));
+    }
+
+    @Test
+    void getAllCurrentLocations_WithSuccess() throws Exception {
+        CurrentLocationDto currentLocationDto1 =
+                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3822", new Location(PARIS_LATITUDE, PARIS_LONGITUDE));
+        CurrentLocationDto currentLocationDto2 =
+                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3823", new Location(LILLE_LATITUDE, LILLE_LONGITUDE));
+        CurrentLocationDto currentLocationDto3 =
+                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3823", new Location(NYC_LATITUDE, NYC_LONGITUDE));
+        List<CurrentLocationDto> allCurrentLocationsDto = new ArrayList<>();
+        allCurrentLocationsDto.add(currentLocationDto1);
+        allCurrentLocationsDto.add(currentLocationDto2);
+        allCurrentLocationsDto.add(currentLocationDto3);
+
+        when(tourGuideServiceMock.getAllCurrentLocations()).thenReturn(allCurrentLocationsDto);
+
+        mockMvc.perform(get("/getAllCurrentLocations"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andExpect(jsonPath("$.[0].userId").value(currentLocationDto1.getUserId()))
+                .andExpect(jsonPath("$.[0].location.latitude").value(currentLocationDto1.getLocation().latitude))
+                .andExpect(jsonPath("$.[0].location.longitude").value(currentLocationDto1.getLocation().longitude))
+                .andExpect(jsonPath("$.[1].userId").value(currentLocationDto2.getUserId()))
+                .andExpect(jsonPath("$.[2].userId").value(currentLocationDto3.getUserId()));
+
+        verify(tourGuideServiceMock, Mockito.times(1)).getAllCurrentLocations();
     }
 }
