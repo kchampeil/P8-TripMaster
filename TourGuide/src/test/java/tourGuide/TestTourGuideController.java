@@ -3,7 +3,6 @@ package tourGuide;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.zalando.jackson.datatype.money.MoneyModule;
 import tourGuide.dto.UserPreferencesDto;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.UserPreferences;
@@ -40,10 +38,10 @@ class TestTourGuideController {
     @MockBean
     private TourGuideService tourGuideServiceMock;
 
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new MoneyModule());
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static UserPreferences userPreferences;
+    private static UserPreferencesDto userPreferencesDto;
 
     @BeforeAll
     public static void setUp() {
@@ -58,44 +56,43 @@ class TestTourGuideController {
         userPreferences.setCurrency(Monetary.getCurrency("USD"));
         userPreferences.setLowerPricePoint(Money.of(5, userPreferences.getCurrency()));
         userPreferences.setHighPricePoint(Money.of(100, userPreferences.getCurrency()));
+
+        userPreferencesDto = new UserPreferencesDto();
+        userPreferencesDto.setAttractionProximity(userPreferences.getAttractionProximity());
+        userPreferencesDto.setNumberOfChildren(userPreferences.getNumberOfChildren());
+        userPreferencesDto.setNumberOfAdults(userPreferences.getNumberOfAdults());
+        userPreferencesDto.setTripDuration(userPreferences.getTripDuration());
+        userPreferencesDto.setTicketQuantity(userPreferences.getTicketQuantity());
+        userPreferencesDto.setCurrency(userPreferences.getCurrency().toString());
+        userPreferencesDto.setLowerPricePoint(userPreferences.getLowerPricePoint().getNumber().intValue());
+        userPreferencesDto.setHighPricePoint(userPreferences.getHighPricePoint().getNumber().intValue());
     }
 
-    @Disabled
+    //@Disabled
     @Test
     void setUserPreferences_WithSuccess() throws Exception {
 
-        UserPreferencesDto userPreferencesDto = new UserPreferencesDto("jon", userPreferences);
+        userPreferencesDto.setUserName("jon");
 
-        /* TODEL : test serialize/deserialize UserPreferences ok */
-        String json = objectMapper.writeValueAsString(userPreferencesDto);//TODEL
-        System.out.println(json);//TODEL
-        UserPreferencesDto upDto = objectMapper.readValue(json, UserPreferencesDto.class); //TODEL
-        System.out.println("username: " + upDto.getUserName());//TODEL
-        System.out.println("lower price: " + upDto.getUserPreferences().getLowerPricePoint());//TODEL
-        System.out.println("currency: " + upDto.getUserPreferences().getCurrency());//TODEL
-
-        when(tourGuideServiceMock.setUserPreferences(userPreferencesDto))
+        when(tourGuideServiceMock.setUserPreferences(any(UserPreferencesDto.class)))
                 .thenReturn(userPreferencesDto);
 
-        //TOASK : dans postman pas d'erreur mais n'affiche pas tout ce qui est monétaire
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)) //TOASK
                 .andExpect(jsonPath("$").isNotEmpty());
 
-        verify(tourGuideServiceMock, Mockito.times(1)).setUserPreferences(userPreferencesDto);
+        verify(tourGuideServiceMock, Mockito.times(1)).setUserPreferences(any(UserPreferencesDto.class));
 
     }
 
-    @Disabled
     @Test
     void setUserPreferences_WithMissingUserName() throws Exception {
 
-        UserPreferencesDto userPreferencesDto = new UserPreferencesDto(null, userPreferences);
+        userPreferencesDto.setUserName(null);
 
-        //TOASK
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
@@ -107,15 +104,14 @@ class TestTourGuideController {
 
     }
 
-    @Disabled
     @Test
     void setUserPreferences_WithUnknownUser() throws Exception {
 
-        UserPreferencesDto userPreferencesDto = new UserPreferencesDto("john", userPreferences);
+        userPreferencesDto.setUserName("john");
 
         when(tourGuideServiceMock.setUserPreferences(any(UserPreferencesDto.class)))
                 .thenThrow(new Exception(USER_DOES_NOT_EXIST));
-        //TOASK
+
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
@@ -124,6 +120,5 @@ class TestTourGuideController {
                         .getResolvedException()).getMessage().contains(USER_DOES_NOT_EXIST)));
 
         verify(tourGuideServiceMock, Mockito.times(1)).setUserPreferences(any(UserPreferencesDto.class));
-
     }
 }

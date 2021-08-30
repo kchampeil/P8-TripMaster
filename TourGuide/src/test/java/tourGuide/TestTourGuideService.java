@@ -17,6 +17,7 @@ import tourGuide.dto.UserPreferencesDto;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
+import tourGuide.service.UserPreferencesService;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 import tripPricer.Provider;
@@ -53,8 +54,12 @@ public class TestTourGuideService {
     @MockBean
     private TripPricer tripPricerMock;
 
+    @MockBean
+    private UserPreferencesService userPreferencesServiceMock;
+
     private User user;
     private static UserPreferences userPreferences;
+    private static UserPreferencesDto userPreferencesDto;
 
     @BeforeAll
     public static void setUp() {
@@ -69,12 +74,22 @@ public class TestTourGuideService {
         userPreferences.setCurrency(Monetary.getCurrency("USD"));
         userPreferences.setLowerPricePoint(Money.of(5, userPreferences.getCurrency()));
         userPreferences.setHighPricePoint(Money.of(100, userPreferences.getCurrency()));
+
+        userPreferencesDto = new UserPreferencesDto();
+        userPreferencesDto.setAttractionProximity(userPreferences.getAttractionProximity());
+        userPreferencesDto.setNumberOfChildren(userPreferences.getNumberOfChildren());
+        userPreferencesDto.setNumberOfAdults(userPreferences.getNumberOfAdults());
+        userPreferencesDto.setTripDuration(userPreferences.getTripDuration());
+        userPreferencesDto.setTicketQuantity(userPreferences.getTicketQuantity());
+        userPreferencesDto.setCurrency(userPreferences.getCurrency().toString());
+        userPreferencesDto.setLowerPricePoint(userPreferences.getLowerPricePoint().getNumber().intValue());
+        userPreferencesDto.setHighPricePoint(userPreferences.getHighPricePoint().getNumber().intValue());
     }
 
     @BeforeEach
     public void setupPerTest() {
         InternalTestHelper.setInternalUserNumber(0);
-        tourGuideService = new TourGuideService(gpsUtilMock, rewardsServiceMock, tripPricerMock);
+        tourGuideService = new TourGuideService(gpsUtilMock, rewardsServiceMock, tripPricerMock, userPreferencesServiceMock);
         tourGuideService.tracker.stopTracking();
 
         user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -246,7 +261,7 @@ public class TestTourGuideService {
     @Test
     void setUserPreferences_WithNoUser_ThrowsException() {
 
-        UserPreferencesDto userPreferencesDto = new UserPreferencesDto("john", userPreferences);
+        userPreferencesDto.setUserName("john");
 
         assertThrows(Exception.class, () -> tourGuideService.setUserPreferences(userPreferencesDto));
     }
@@ -255,11 +270,18 @@ public class TestTourGuideService {
     void setUserPreferences_WithSuccess() throws Exception {
 
         tourGuideService.addUser(user);
-        UserPreferencesDto userPreferencesDto = new UserPreferencesDto(user.getUserName(), userPreferences);
+        userPreferencesDto.setUserName(user.getUserName());
+
+        when(userPreferencesServiceMock.getUserPreferencesDtoFromUserPreferences(userPreferences)).thenReturn(userPreferencesDto);
+        when(userPreferencesServiceMock.getUserPreferencesFromUserPreferencesDto(userPreferencesDto)).thenReturn(userPreferences);
 
         UserPreferencesDto userPreferencesDtoReturned = tourGuideService.setUserPreferences(userPreferencesDto);
 
         assertEquals(userPreferencesDto.getUserName(), userPreferencesDtoReturned.getUserName());
-        assertEquals(userPreferencesDto.getUserPreferences(), userPreferencesDtoReturned.getUserPreferences());
+        assertEquals(userPreferencesDto.getNumberOfAdults(), userPreferencesDtoReturned.getNumberOfAdults());
+        assertEquals(userPreferencesDto.getCurrency(), userPreferencesDtoReturned.getCurrency());
+
+        verify(userPreferencesServiceMock, Mockito.times(1)).getUserPreferencesDtoFromUserPreferences(userPreferences);
+        verify(userPreferencesServiceMock, Mockito.times(1)).getUserPreferencesFromUserPreferencesDto(userPreferencesDto);
     }
 }

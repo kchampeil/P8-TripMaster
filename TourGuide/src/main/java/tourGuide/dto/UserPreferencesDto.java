@@ -2,7 +2,6 @@ package tourGuide.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import tourGuide.user.UserPreferences;
 
 import javax.validation.constraints.NotNull;
 
@@ -13,13 +12,13 @@ public class UserPreferencesDto {
     @NotNull
     private String userName;
 
-    private UserPreferences userPreferences;
+    private int attractionProximity;
+    private String currency;
+    private int lowerPricePoint;
+    private int highPricePoint;
+    private int tripDuration;
+    private int ticketQuantity;
+    private int numberOfAdults;
+    private int numberOfChildren;
 
-    public UserPreferencesDto(String userName, UserPreferences userPreferences) {
-        this.userName = userName;
-        this.userPreferences = userPreferences;
-    }
-
-    public UserPreferencesDto() {
-    }
 }

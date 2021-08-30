@@ -11,6 +11,7 @@ import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
+import tourGuide.service.UserPreferencesService;
 import tourGuide.user.User;
 import tripPricer.TripPricer;
 
@@ -55,7 +56,7 @@ public class TestPerformance {
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(100000);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer(), new UserPreferencesService());
 
         List<User> allUsers = tourGuideService.getAllUsers();
 
@@ -81,7 +82,7 @@ public class TestPerformance {
         InternalTestHelper.setInternalUserNumber(5000);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer());
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer(), new UserPreferencesService());
 
         Attraction attraction = gpsUtil.getAttractions().get(0);
         List<User> allUsers = tourGuideService.getAllUsers();

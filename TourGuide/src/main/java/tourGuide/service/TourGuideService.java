@@ -40,13 +40,15 @@ public class TourGuideService {
     private final GpsUtil gpsUtil;
     private final RewardsService rewardsService;
     private final TripPricer tripPricer;
+    private final IUserPreferencesService userPreferencesService;
     public final Tracker tracker;
     boolean testMode = true;
 
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, TripPricer tripPricer) {
+    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, TripPricer tripPricer, IUserPreferencesService userPreferencesService) {
         this.gpsUtil = gpsUtil;
         this.rewardsService = rewardsService;
         this.tripPricer = tripPricer;
+        this.userPreferencesService = userPreferencesService;
 
         if (testMode) {
             logger.info("TestMode enabled");
@@ -134,19 +136,33 @@ public class TourGuideService {
         return nearByAttractionDtoList;
     }
 
+    /**
+     * Set the user preferences for a user (userName included in the UserPreferencesDto)
+     *
+     * @param userPreferencesDto userName and other user preferences
+     * @return a UserPreferencesDto object with information from the updated UserPreferences
+     * @throws Exception if no user exists for the given userName
+     */
     public UserPreferencesDto setUserPreferences(UserPreferencesDto userPreferencesDto) throws Exception {
 
         User user = this.getUser(userPreferencesDto.getUserName());
 
         if (user != null) {
-            logger.info("Set user preferences for: " + userPreferencesDto.getUserName());
-            user.setUserPreferences(userPreferencesDto.getUserPreferences());
-            return new UserPreferencesDto(user.getUserName(), user.getUserPreferences());
+
+            UserPreferences userPreferences = userPreferencesService.getUserPreferencesFromUserPreferencesDto(userPreferencesDto);
+            user.setUserPreferences(userPreferences);
+            logger.info("User preferences set for: " + userPreferencesDto.getUserName());
+
+            //return the updated data
+            UserPreferencesDto userPreferencesDtoReturned =
+                    userPreferencesService.getUserPreferencesDtoFromUserPreferences(user.getUserPreferences());
+            userPreferencesDtoReturned.setUserName(user.getUserName());
+
+            return userPreferencesDtoReturned;
 
         } else {
             throw new Exception(USER_DOES_NOT_EXIST);
         }
-
     }
 
     private void addShutDownHook() {

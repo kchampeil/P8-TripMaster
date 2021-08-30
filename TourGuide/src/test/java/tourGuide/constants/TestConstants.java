@@ -2,7 +2,7 @@ package tourGuide.constants;
 
 public class TestConstants {
     public static final double PARIS_LATITUDE = 48.856614;
-    public static final double PARIS_LONGITUDE = 2.3522219;
+    public static final double PARIS_LONGITUDE = 2.352222;
     public static final double LILLE_LATITUDE = 50.62925;
     public static final double LILLE_LONGITUDE = 3.057256;
     public static final double NYC_LATITUDE = 40.712784;
