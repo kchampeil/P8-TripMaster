@@ -196,6 +196,33 @@ public class TestTourGuideService {
     }
 
     @Test
+    public void trackUserLocationForUserList() {
+
+        VisitedLocation visitedLocation1 = new VisitedLocation(
+                user1.getUserId(),
+                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                Date.from(Instant.now()));
+        when(gpsUtilMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation1);
+
+        VisitedLocation visitedLocation2 = new VisitedLocation(
+                user2.getUserId(),
+                new Location(TestConstants.NYC_LATITUDE, TestConstants.NYC_LONGITUDE),
+                Date.from(Instant.now()));
+        when(gpsUtilMock.getUserLocation(user2.getUserId())).thenReturn(visitedLocation2);
+
+        List<User> allUsers = new ArrayList<>();
+        allUsers.add(user1);
+        allUsers.add(user2);
+        tourGuideService.trackUserLocationForUserList(allUsers);
+
+        assertEquals(visitedLocation1, user1.getLastVisitedLocation());
+        assertEquals(visitedLocation2, user2.getLastVisitedLocation());
+
+        verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user1.getUserId());
+        verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user2.getUserId());
+    }
+
+    @Test
     public void getNearbyAttractions() {
 
         tourGuideService.addUser(user1);

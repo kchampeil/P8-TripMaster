@@ -46,6 +46,7 @@ public class Tracker extends Thread {
             stopWatch.start();
 
             tourGuideService.trackUserLocationForUserList(users);
+            tourGuideService.shutDownTourGuideExecutorService();
 
             stopWatch.stop();
             logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");

@@ -113,8 +113,6 @@ public class TourGuideService {
         return visitedLocation;
     }
 
-    //TODO unit and integration tests
-
     /**
      * track user's location for all users of a list in multi-thread mode
      *
