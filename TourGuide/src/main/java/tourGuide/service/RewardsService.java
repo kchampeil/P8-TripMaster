@@ -4,6 +4,7 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import rewardCentral.RewardCentral;
 import tourGuide.user.User;
@@ -12,7 +13,15 @@ import tourGuide.user.UserReward;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
+import static tourGuide.constants.TourGuideConstants.THREAD_POOL_SIZE;
+
+@Slf4j
 @Service
 public class RewardsService {
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
@@ -23,6 +32,8 @@ public class RewardsService {
     private static final int ATTRACTION_PROXIMITY_RANGE = 200;
     private final GpsUtil gpsUtil;
     private final RewardCentral rewardsCentral;
+
+    private final ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
     public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
@@ -56,6 +67,35 @@ public class RewardsService {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * calculate rewards for all users of a list in multi-thread mode
+     *
+     * @param userList the list of users whom we want to calculate rewards
+     */
+    public void calculateRewardsForUserList(List<User> userList) {
+
+        for (User user : userList) {
+            Future future = rewardsExecutorService.submit(() -> calculateRewards(user));
+
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Error while calculating rewards", e.getCause());
+            }
+        }
+    }
+
+    public void shutDownRewardsExecutorService() {
+        rewardsExecutorService.shutdown();
+        try {
+            if (!rewardsExecutorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                rewardsExecutorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            rewardsExecutorService.shutdownNow();
         }
     }
 

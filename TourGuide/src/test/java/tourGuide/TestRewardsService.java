@@ -96,4 +96,45 @@ public class TestRewardsService {
         assertFalse(rewardsService.isWithinAttractionProximity(attraction2, attraction1));
     }
 
+    @Test
+    public void getRewardsForUserList() {
+
+        User user1 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
+
+        Attraction attraction1 = new Attraction("MoMA", "New York City",
+                "New York", TestConstants.NYC_LATITUDE, TestConstants.NYC_LONGITUDE);
+        Attraction attraction2 = new Attraction("Orsay", "Paris",
+                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
+        Attraction attraction3 = new Attraction("Musée des Beaux-Arts", "Lille",
+                "France", TestConstants.LILLE_LATITUDE, TestConstants.LILLE_LONGITUDE);
+
+        List<Attraction> attractionList = new ArrayList<>();
+        attractionList.add(attraction1);
+        attractionList.add(attraction2);
+        attractionList.add(attraction3);
+
+        user1.addToVisitedLocations(new VisitedLocation(user1.getUserId(), attraction2, new Date()));
+        user2.addToVisitedLocations(new VisitedLocation(user2.getUserId(), attraction1, new Date()));
+
+        List<User> allUsers = new ArrayList<>();
+        allUsers.add(user1);
+        allUsers.add(user2);
+
+        when(gpsUtilMock.getAttractions()).thenReturn(attractionList);
+        when(rewardCentralMock.getAttractionRewardPoints(any(UUID.class), any(UUID.class))).thenReturn(100);
+
+        rewardsService.calculateRewardsForUserList(allUsers);
+
+        for (User user : allUsers) {
+            List<UserReward> userRewards = user.getUserRewards();
+            assertEquals(1, userRewards.size());
+            assertEquals(100, userRewards.get(0).getRewardPoints());
+        }
+
+        verify(gpsUtilMock, Mockito.times(allUsers.size())).getAttractions();
+        verify(rewardCentralMock, Mockito.times(allUsers.size()))
+                .getAttractionRewardPoints(any(UUID.class), any(UUID.class));
+
+    }
 }
