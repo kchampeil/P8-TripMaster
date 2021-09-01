@@ -22,8 +22,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static tourGuide.constants.TourGuideConstants.THREAD_POOL_SIZE;
 import static tourGuide.constants.TourGuideExceptionConstants.USER_DOES_NOT_EXIST;
 
 @Service
@@ -35,6 +42,10 @@ public class TourGuideService {
     private final IUserPreferencesService userPreferencesService;
     public final Tracker tracker;
     boolean testMode = true;
+
+    private final ExecutorService tourGuideExecutorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    private final ExecutorCompletionService<VisitedLocation> completionService
+            = new ExecutorCompletionService<>(tourGuideExecutorService);
 
     private static final String TRIP_PRICER_API_KEY = "test-server-api-key";
     // Database connection will be used for external users,
@@ -100,6 +111,41 @@ public class TourGuideService {
         user.addToVisitedLocations(visitedLocation);
         rewardsService.calculateRewards(user);
         return visitedLocation;
+    }
+
+    //TODO unit and integration tests
+
+    /**
+     * track user's location for all users of a list in multi-thread mode
+     *
+     * @param userList the list of users whom we want to track the location
+     */
+    public void trackUserLocationForUserList(List<User> userList) {
+
+        for (User user : userList) {
+            completionService.submit(() -> trackUserLocation(user));
+        }
+
+        try {
+            for (int i = 0; i < userList.size(); i++) {
+                Future<VisitedLocation> future = completionService.take();
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error while tracking users", e.getCause());
+        }
+
+    }
+
+    public void shutDownTourGuideExecutorService() {
+        tourGuideExecutorService.shutdown();
+        try {
+            if (!tourGuideExecutorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                tourGuideExecutorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            tourGuideExecutorService.shutdownNow();
+        }
     }
 
     /**
