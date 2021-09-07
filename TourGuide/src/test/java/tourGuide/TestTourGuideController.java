@@ -64,7 +64,7 @@ class TestTourGuideController {
         userPreferencesDto.setLowerPricePoint(5);
         userPreferencesDto.setHighPricePoint(100);
     }
-    
+
     @Test
     void setUserPreferences_WithSuccess() throws Exception {
 
@@ -77,7 +77,7 @@ class TestTourGuideController {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)) //TOASK
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$").isNotEmpty());
 
         verify(tourGuideServiceMock, Mockito.times(1)).setUserPreferences(any(UserPreferencesDto.class));

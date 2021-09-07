@@ -30,7 +30,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static tourGuide.constants.TourGuideConstants.THREAD_POOL_SIZE;
 import static tourGuide.constants.TourGuideExceptionConstants.USER_DOES_NOT_EXIST;
 
 @Service
@@ -43,7 +42,7 @@ public class TourGuideService {
     public final Tracker tracker;
     boolean testMode = true;
 
-    private final ExecutorService tourGuideExecutorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    private final ExecutorService tourGuideExecutorService = Executors.newFixedThreadPool(20);
     private final ExecutorCompletionService<VisitedLocation> completionService
             = new ExecutorCompletionService<>(tourGuideExecutorService);
 

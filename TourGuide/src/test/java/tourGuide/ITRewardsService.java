@@ -44,8 +44,6 @@ public class ITRewardsService {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer(), new UserPreferencesService());
 
         User user = tourGuideService.getAllUsers().get(0);
-        double lowerPrice = user.getUserPreferences().getLowerPricePoint().getNumber().doubleValue();
-        double higherPrice = user.getUserPreferences().getHighPricePoint().getNumber().doubleValue();
 
         List<Provider> providers = tourGuideService.getTripDeals(user.getUserName());
 

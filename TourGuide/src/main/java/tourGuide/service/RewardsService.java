@@ -19,8 +19,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static tourGuide.constants.TourGuideConstants.THREAD_POOL_SIZE;
-
 @Slf4j
 @Service
 public class RewardsService {
@@ -33,7 +31,7 @@ public class RewardsService {
     private final GpsUtil gpsUtil;
     private final RewardCentral rewardsCentral;
 
-    private final ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    private final ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(60);
 
     public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
@@ -78,7 +76,7 @@ public class RewardsService {
     public void calculateRewardsForUserList(List<User> userList) {
 
         for (User user : userList) {
-            Future future = rewardsExecutorService.submit(() -> calculateRewards(user));
+            Future<?> future = rewardsExecutorService.submit(() -> calculateRewards(user));
 
             try {
                 future.get();
