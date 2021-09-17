@@ -1,15 +1,16 @@
 package tourGuide.service;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.CurrentLocationDto;
 import tourGuide.dto.NearByAttractionDto;
 import tourGuide.dto.UserPreferencesDto;
+import tourGuide.model.AttractionBean;
+import tourGuide.model.LocationBean;
+import tourGuide.model.VisitedLocationBean;
+import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.IUserPreferencesService;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
@@ -35,7 +36,7 @@ import static tourGuide.constants.TourGuideExceptionConstants.USER_DOES_NOT_EXIS
 @Service
 public class TourGuideService {
     private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private final GpsUtil gpsUtil;
+    private final IGpsUtilAPIRequestService gpsUtilAPIRequestService;
     private final RewardsService rewardsService;
     private final TripPricer tripPricer;
     private final IUserPreferencesService userPreferencesService;
@@ -43,7 +44,7 @@ public class TourGuideService {
     boolean testMode = true;
 
     private final ExecutorService tourGuideExecutorService = Executors.newFixedThreadPool(20);
-    private final ExecutorCompletionService<VisitedLocation> completionService
+    private final ExecutorCompletionService<VisitedLocationBean> completionService
             = new ExecutorCompletionService<>(tourGuideExecutorService);
 
     private static final String TRIP_PRICER_API_KEY = "test-server-api-key";
@@ -51,9 +52,9 @@ public class TourGuideService {
     // but for testing purposes internal users are provided and stored in memory
     private final Map<String, User> internalUserMap = new HashMap<>();
 
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService,
+    public TourGuideService(IGpsUtilAPIRequestService gpsUtilAPIRequestService, RewardsService rewardsService,
                             TripPricer tripPricer, IUserPreferencesService userPreferencesService) {
-        this.gpsUtil = gpsUtil;
+        this.gpsUtilAPIRequestService = gpsUtilAPIRequestService;
         this.rewardsService = rewardsService;
         this.tripPricer = tripPricer;
         this.userPreferencesService = userPreferencesService;
@@ -73,7 +74,7 @@ public class TourGuideService {
         return user.getUserRewards();
     }
 
-    public VisitedLocation getUserLocation(String userName) {
+    public VisitedLocationBean getUserLocation(String userName) {
         User user = this.getUser(userName);
         return (user.getVisitedLocations().size() > 0) ?
                 user.getLastVisitedLocation() :
@@ -105,8 +106,8 @@ public class TourGuideService {
         return providers;
     }
 
-    public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+    public VisitedLocationBean trackUserLocation(User user) {
+        VisitedLocationBean visitedLocation = gpsUtilAPIRequestService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
         rewardsService.calculateRewards(user);
         return visitedLocation;
@@ -125,7 +126,7 @@ public class TourGuideService {
 
         try {
             for (int i = 0; i < userList.size(); i++) {
-                Future<VisitedLocation> future = completionService.take();
+                Future<VisitedLocationBean> future = completionService.take();
                 future.get();
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -152,8 +153,8 @@ public class TourGuideService {
      * @return a list of NearByAttractionDto
      */
     public List<NearByAttractionDto> getNearByAttractions(String userName) {
-        VisitedLocation visitedLocation = this.getUserLocation(userName);
-        List<Attraction> nearbyAttractions = gpsUtil.getAttractions()
+        VisitedLocationBean visitedLocation = this.getUserLocation(userName);
+        List<AttractionBean> nearbyAttractions = gpsUtilAPIRequestService.getAttractions()
                 .stream()
                 .sorted(Comparator.comparingDouble(attraction ->
                         rewardsService.getDistance(attraction, visitedLocation.location)))
@@ -162,10 +163,10 @@ public class TourGuideService {
 
         List<NearByAttractionDto> nearByAttractionDtoList = new ArrayList<>();
 
-        for (Attraction attraction : nearbyAttractions) {
+        for (AttractionBean attraction : nearbyAttractions) {
             NearByAttractionDto nearByAttractionDTO = new NearByAttractionDto();
             nearByAttractionDTO.setAttractionName(attraction.attractionName);
-            nearByAttractionDTO.setAttractionLocation(new Location(attraction.latitude, attraction.longitude));
+            nearByAttractionDTO.setAttractionLocation(new LocationBean(attraction.latitude, attraction.longitude));
             nearByAttractionDTO.setUserLocation(visitedLocation.location);
             nearByAttractionDTO.setAttractionDistanceFromUser(
                     rewardsService.getDistance(attraction, visitedLocation.location));

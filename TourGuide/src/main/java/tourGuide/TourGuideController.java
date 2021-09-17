@@ -1,7 +1,6 @@
 package tourGuide;
 
 import com.jsoniter.output.JsonStream;
-import gpsUtil.location.VisitedLocation;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import tourGuide.dto.UserPreferencesDto;
+import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.TourGuideService;
 import tripPricer.Provider;
 
@@ -35,15 +35,15 @@ public class TourGuideController {
         this.tourGuideService = tourGuideService;
     }
 
-    @RequestMapping("/")
+    @GetMapping("/")
     public String index() {
         return "Greetings from TourGuide!";
     }
 
     @ApiOperation(value = "Get the most recent location for the user corresponding to the given userName")
-    @RequestMapping("/getLocation")
+    @GetMapping("/getLocation")
     public String getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userName);
+        VisitedLocationBean visitedLocation = tourGuideService.getUserLocation(userName);
         return JsonStream.serialize(visitedLocation.location);
     }
 
@@ -57,19 +57,19 @@ public class TourGuideController {
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @ApiOperation(value = "Get the closest five tourist attractions to the user - no matter how far away they are")
-    @RequestMapping("/getNearbyAttractions")
+    @GetMapping("/getNearbyAttractions")
     public String getNearbyAttractions(@RequestParam String userName) {
         return JsonStream.serialize(tourGuideService.getNearByAttractions(userName));
     }
 
-    @ApiOperation(value = "Get a list of user's rewards")
-    @RequestMapping("/getRewards")
+    @ApiOperation(value = "Get the list of user's rewards for a given user")
+    @GetMapping("/getRewards")
     public String getRewards(@RequestParam String userName) {
         return JsonStream.serialize(tourGuideService.getUserRewards(userName));
     }
 
     @ApiOperation(value = "Get a list of every user's most recent location")
-    @RequestMapping("/getAllCurrentLocations")
+    @GetMapping("/getAllCurrentLocations")
     public String getAllCurrentLocations() {
         // DONE: Get a list of every user's most recent location as JSON
         //- Note: does not use gpsUtil to query for their current location,
@@ -84,8 +84,8 @@ public class TourGuideController {
         return JsonStream.serialize(tourGuideService.getAllCurrentLocations());
     }
 
-    @ApiOperation(value = "Get a list of of trip deals (providers)")
-    @RequestMapping("/getTripDeals")
+    @ApiOperation(value = "Get a list of of trip deals (providers) for a given user")
+    @GetMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
         List<Provider> providers = tourGuideService.getTripDeals(userName);
         return JsonStream.serialize(providers);

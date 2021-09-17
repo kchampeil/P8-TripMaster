@@ -1,18 +1,18 @@
 package tourGuide.dto;
 
-import gpsUtil.location.Location;
 import lombok.Getter;
 import lombok.Setter;
+import tourGuide.model.LocationBean;
 
 @Getter
 @Setter
 public class CurrentLocationDto {
 
     private String userId;
-    
-    private Location location;
 
-    public CurrentLocationDto(String userId, Location location) {
+    private LocationBean location;
+
+    public CurrentLocationDto(String userId, LocationBean location) {
         this.userId = userId;
         this.location = location;
     }

@@ -8,3 +8,6 @@
  */
 
 rootProject.name = 'TourGuide'
+include 'GpsUtilAPI'
+include 'GpsUtilAPI'
+

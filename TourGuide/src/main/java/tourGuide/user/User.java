@@ -1,6 +1,6 @@
 package tourGuide.user;
 
-import gpsUtil.location.VisitedLocation;
+import tourGuide.model.VisitedLocationBean;
 import tripPricer.Provider;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class User {
     private String phoneNumber;
     private String emailAddress;
     private Date latestLocationTimestamp;
-    private List<VisitedLocation> visitedLocations = new ArrayList<>();
+    private List<VisitedLocationBean> visitedLocations = new ArrayList<>();
     private List<UserReward> userRewards = new ArrayList<>();
     private UserPreferences userPreferences = new UserPreferences();
     private List<Provider> tripDeals = new ArrayList<>();
@@ -58,11 +58,11 @@ public class User {
         return latestLocationTimestamp != null ? new Date(latestLocationTimestamp.getTime()) : null;
     }
 
-    public void addToVisitedLocations(VisitedLocation visitedLocation) {
+    public void addToVisitedLocations(VisitedLocationBean visitedLocation) {
         visitedLocations.add(visitedLocation);
     }
 
-    public List<VisitedLocation> getVisitedLocations() {
+    public List<VisitedLocationBean> getVisitedLocations() {
         return visitedLocations;
     }
 
@@ -95,7 +95,7 @@ public class User {
         this.userPreferences = userPreferences;
     }
 
-    public VisitedLocation getLastVisitedLocation() {
+    public VisitedLocationBean getLastVisitedLocation() {
         if (visitedLocations.size() == 0) {
             return null;
         }

@@ -1,13 +1,14 @@
 package tourGuide;
 
-import gpsUtil.GpsUtil;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.UserPreferencesService;
+import tourGuide.service.contracts.IGpsUtilAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
@@ -20,28 +21,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public class ITRewardsService {
 
+    @Autowired
+    private IGpsUtilAPIRequestService gpsUtilAPIRequestService;
+
     @Test
     public void nearAllAttractions() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
         InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer(), new UserPreferencesService());
+        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService, new TripPricer(), new UserPreferencesService());
 
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
         List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0).getUserName());
         tourGuideService.tracker.stopTracking();
 
-        assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
+        assertEquals(gpsUtilAPIRequestService.getAttractions().size(), userRewards.size());
     }
 
     @Test
     public void getTripDealsUsingUserPreferences() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer(), new UserPreferencesService());
+        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService, new TripPricer(), new UserPreferencesService());
 
         User user = tourGuideService.getAllUsers().get(0);
 

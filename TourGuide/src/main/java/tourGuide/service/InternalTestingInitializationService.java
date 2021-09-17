@@ -1,10 +1,10 @@
 package tourGuide.service;
 
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
 import org.javamoney.moneta.Money;
 import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.LocationBean;
+import tourGuide.model.VisitedLocationBean;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 
@@ -25,7 +25,7 @@ public class InternalTestingInitializationService {
     /**
      * Initialization of users for internal testing
      *
-     * @param internalUserMap
+     * @param internalUserMap map of userName/user
      */
     public static Map<String, User> initializeInternalUsers(Map<String, User> internalUserMap) {
         IntStream.range(0, InternalTestHelper.getInternalUserNumber()).forEach(i -> {
@@ -44,8 +44,8 @@ public class InternalTestingInitializationService {
 
     private static void generateUserLocationHistory(User user) {
         IntStream.range(0, 3).forEach(i -> {
-            user.addToVisitedLocations(new VisitedLocation(user.getUserId(),
-                    new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
+            user.addToVisitedLocations(new VisitedLocationBean(user.getUserId(),
+                    new LocationBean(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
         });
     }
 

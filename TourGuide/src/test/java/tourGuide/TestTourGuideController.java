@@ -1,7 +1,6 @@
 package tourGuide;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gpsUtil.location.Location;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,13 +9,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import tourGuide.dto.CurrentLocationDto;
 import tourGuide.dto.UserPreferencesDto;
+import tourGuide.model.LocationBean;
 import tourGuide.service.TourGuideService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,7 +52,6 @@ class TestTourGuideController {
 
     @BeforeAll
     public static void setUp() {
-        Locale.setDefault(Locale.US);
 
         userPreferencesDto = new UserPreferencesDto();
         userPreferencesDto.setAttractionProximity(10);
@@ -76,6 +75,7 @@ class TestTourGuideController {
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$").isNotEmpty());
@@ -92,6 +92,7 @@ class TestTourGuideController {
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(Objects.requireNonNull(result
                         .getResolvedException()).getMessage().contains(INVALID_INPUT)));
@@ -111,6 +112,7 @@ class TestTourGuideController {
         mockMvc.perform(post("/userPreferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userPreferencesDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(Objects.requireNonNull(result
                         .getResolvedException()).getMessage().contains(USER_DOES_NOT_EXIST)));
@@ -121,11 +123,11 @@ class TestTourGuideController {
     @Test
     void getAllCurrentLocations_WithSuccess() throws Exception {
         CurrentLocationDto currentLocationDto1 =
-                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3822", new Location(PARIS_LATITUDE, PARIS_LONGITUDE));
+                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3822", new LocationBean(PARIS_LATITUDE, PARIS_LONGITUDE));
         CurrentLocationDto currentLocationDto2 =
-                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3823", new Location(LILLE_LATITUDE, LILLE_LONGITUDE));
+                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3823", new LocationBean(LILLE_LATITUDE, LILLE_LONGITUDE));
         CurrentLocationDto currentLocationDto3 =
-                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3823", new Location(NYC_LATITUDE, NYC_LONGITUDE));
+                new CurrentLocationDto("019b04a9-067a-4c76-8817-ee75088c3823", new LocationBean(NYC_LATITUDE, NYC_LONGITUDE));
         List<CurrentLocationDto> allCurrentLocationsDto = new ArrayList<>();
         allCurrentLocationsDto.add(currentLocationDto1);
         allCurrentLocationsDto.add(currentLocationDto2);
@@ -134,6 +136,7 @@ class TestTourGuideController {
         when(tourGuideServiceMock.getAllCurrentLocations()).thenReturn(allCurrentLocationsDto);
 
         mockMvc.perform(get("/getAllCurrentLocations"))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isNotEmpty())
                 .andExpect(jsonPath("$.[0].userId").value(currentLocationDto1.getUserId()))

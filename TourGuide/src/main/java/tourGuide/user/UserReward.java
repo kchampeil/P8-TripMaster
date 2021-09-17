@@ -1,30 +1,31 @@
 package tourGuide.user;
 
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
+import tourGuide.model.AttractionBean;
+import tourGuide.model.VisitedLocationBean;
 
 public class UserReward {
 
-	public final VisitedLocation visitedLocation;
-	public final Attraction attraction;
-	private int rewardPoints;
-	public UserReward(VisitedLocation visitedLocation, Attraction attraction, int rewardPoints) {
-		this.visitedLocation = visitedLocation;
-		this.attraction = attraction;
-		this.rewardPoints = rewardPoints;
-	}
-	
-	public UserReward(VisitedLocation visitedLocation, Attraction attraction) {
-		this.visitedLocation = visitedLocation;
-		this.attraction = attraction;
-	}
+    public final VisitedLocationBean visitedLocation;
+    public final AttractionBean attraction;
+    private int rewardPoints;
 
-	public void setRewardPoints(int rewardPoints) {
-		this.rewardPoints = rewardPoints;
-	}
-	
-	public int getRewardPoints() {
-		return rewardPoints;
-	}
-	
+    public UserReward(VisitedLocationBean visitedLocation, AttractionBean attraction, int rewardPoints) {
+        this.visitedLocation = visitedLocation;
+        this.attraction = attraction;
+        this.rewardPoints = rewardPoints;
+    }
+
+    public UserReward(VisitedLocationBean visitedLocation, AttractionBean attraction) {
+        this.visitedLocation = visitedLocation;
+        this.attraction = attraction;
+    }
+
+    public void setRewardPoints(int rewardPoints) {
+        this.rewardPoints = rewardPoints;
+    }
+
+    public int getRewardPoints() {
+        return rewardPoints;
+    }
+
 }

@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.contracts;
 
 import tourGuide.dto.UserPreferencesDto;
 import tourGuide.user.UserPreferences;

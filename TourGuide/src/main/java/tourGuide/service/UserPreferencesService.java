@@ -3,6 +3,7 @@ package tourGuide.service;
 import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.UserPreferencesDto;
+import tourGuide.service.contracts.IUserPreferencesService;
 import tourGuide.user.UserPreferences;
 
 import javax.money.Monetary;

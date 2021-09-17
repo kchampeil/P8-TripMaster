@@ -1,23 +1,22 @@
 package tourGuide;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.AttractionBean;
+import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.UserPreferencesService;
+import tourGuide.service.contracts.IGpsUtilAPIRequestService;
 import tourGuide.user.User;
 import tripPricer.TripPricer;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,19 +43,16 @@ public class TestPerformance {
      *          assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
      */
 
-    @BeforeAll
-    public static void setUp() {
-        Locale.setDefault(Locale.US);
-    }
+    @Autowired
+    private IGpsUtilAPIRequestService gpsUtilAPIRequestService;
 
     @Disabled
     @Test
     public void highVolumeTrackLocation() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(50000);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService,
+        InternalTestHelper.setInternalUserNumber(1000);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService,
                 new TripPricer(), new UserPreferencesService());
 
         List<User> allUsers = tourGuideService.getAllUsers();
@@ -78,19 +74,18 @@ public class TestPerformance {
     @Disabled
     @Test
     public void highVolumeGetRewards() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         InternalTestHelper.setInternalUserNumber(100000);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, new TripPricer(), new UserPreferencesService());
+        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService, new TripPricer(), new UserPreferencesService());
 
-        Attraction attraction = gpsUtil.getAttractions().get(0);
+        AttractionBean attraction = gpsUtilAPIRequestService.getAttractions().get(0);
         List<User> allUsers = tourGuideService.getAllUsers();
-        allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+        allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocationBean(u.getUserId(), attraction, new Date())));
 
         rewardsService.calculateRewardsForUserList(allUsers);
         rewardsService.shutDownRewardsExecutorService();

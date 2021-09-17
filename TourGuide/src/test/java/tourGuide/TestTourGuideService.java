@@ -1,9 +1,5 @@
 package tourGuide;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
 import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,13 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import tourGuide.constants.TestConstants;
 import tourGuide.dto.NearByAttractionDto;
 import tourGuide.dto.UserPreferencesDto;
 import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.AttractionBean;
+import tourGuide.model.LocationBean;
+import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.UserPreferencesService;
+import tourGuide.service.contracts.IGpsUtilAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 import tripPricer.Provider;
@@ -28,7 +27,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +37,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static tourGuide.constants.TestConstants.DISTANCE_LILLE_TO_PARIS_IN_MI;
+import static tourGuide.constants.TestConstants.DISTANCE_NYC_TO_PARIS_IN_MI;
+import static tourGuide.constants.TestConstants.LILLE_LATITUDE;
+import static tourGuide.constants.TestConstants.LILLE_LONGITUDE;
+import static tourGuide.constants.TestConstants.NYC_LATITUDE;
+import static tourGuide.constants.TestConstants.NYC_LONGITUDE;
+import static tourGuide.constants.TestConstants.PARIS_LATITUDE;
+import static tourGuide.constants.TestConstants.PARIS_LONGITUDE;
 
 @SpringBootTest
 public class TestTourGuideService {
@@ -46,7 +52,7 @@ public class TestTourGuideService {
     private TourGuideService tourGuideService;
 
     @MockBean
-    private GpsUtil gpsUtilMock;
+    private IGpsUtilAPIRequestService gpsUtilAPIRequestServiceMock;
 
     @MockBean
     private RewardsService rewardsServiceMock;
@@ -62,29 +68,28 @@ public class TestTourGuideService {
 
     private static UserPreferences userPreferences;
     private static UserPreferencesDto userPreferencesDto;
-    private static Attraction attraction1;
-    private static Attraction attraction2;
-    private static Attraction attraction3;
-    private static Attraction attraction4;
-    private static Attraction attraction5;
-    private static Attraction attraction6;
+    private static AttractionBean attraction1;
+    private static AttractionBean attraction2;
+    private static AttractionBean attraction3;
+    private static AttractionBean attraction4;
+    private static AttractionBean attraction5;
+    private static AttractionBean attraction6;
 
     @BeforeAll
     public static void setUp() {
-        Locale.setDefault(Locale.US);
 
-        attraction1 = new Attraction("MoMA", "New York City",
-                "New York", TestConstants.NYC_LATITUDE, TestConstants.NYC_LONGITUDE);
-        attraction2 = new Attraction("Louvre", "Paris",
-                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
-        attraction3 = new Attraction("Orsay", "Paris",
-                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
-        attraction4 = new Attraction("Quai Branly", "Paris",
-                "France", TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE);
-        attraction5 = new Attraction("Palais des Beaux Arts", "Lille",
-                "France", TestConstants.LILLE_LATITUDE, TestConstants.LILLE_LONGITUDE);
-        attraction6 = new Attraction("Musée d'Histoire Naturelle", "Lille",
-                "France", TestConstants.LILLE_LATITUDE, TestConstants.LILLE_LONGITUDE);
+        attraction1 = new AttractionBean("MoMA", "New York City",
+                "New York", NYC_LATITUDE, NYC_LONGITUDE);
+        attraction2 = new AttractionBean("Louvre", "Paris",
+                "France", PARIS_LATITUDE, PARIS_LONGITUDE);
+        attraction3 = new AttractionBean("Orsay", "Paris",
+                "France", PARIS_LATITUDE, PARIS_LONGITUDE);
+        attraction4 = new AttractionBean("Quai Branly", "Paris",
+                "France", PARIS_LATITUDE, PARIS_LONGITUDE);
+        attraction5 = new AttractionBean("Palais des Beaux Arts", "Lille",
+                "France", LILLE_LATITUDE, LILLE_LONGITUDE);
+        attraction6 = new AttractionBean("Musée d'Histoire Naturelle", "Lille",
+                "France", LILLE_LATITUDE, LILLE_LONGITUDE);
 
         userPreferences = new UserPreferences();
         userPreferences.setAttractionProximity(10);
@@ -110,7 +115,7 @@ public class TestTourGuideService {
     @BeforeEach
     public void setupPerTest() {
         InternalTestHelper.setInternalUserNumber(0);
-        tourGuideService = new TourGuideService(gpsUtilMock, rewardsServiceMock, tripPricerMock, userPreferencesServiceMock);
+        tourGuideService = new TourGuideService(gpsUtilAPIRequestServiceMock, rewardsServiceMock, tripPricerMock, userPreferencesServiceMock);
         tourGuideService.tracker.stopTracking();
 
         user1 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -120,37 +125,37 @@ public class TestTourGuideService {
     @Test
     public void getUserLocation_WithExistingVisitedLocations() {
 
-        VisitedLocation visitedLocation = new VisitedLocation(
+        VisitedLocationBean visitedLocation = new VisitedLocationBean(
                 user1.getUserId(),
-                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                new LocationBean(PARIS_LATITUDE, PARIS_LONGITUDE),
                 Date.from(Instant.now()));
         user1.addToVisitedLocations(visitedLocation);
 
         tourGuideService.addUser(user1);
-        VisitedLocation lastUserLocation = tourGuideService.getUserLocation(user1.getUserName());
+        VisitedLocationBean lastUserLocation = tourGuideService.getUserLocation(user1.getUserName());
 
         assertEquals(visitedLocation, lastUserLocation);
         assertEquals(user1.getUserId(), lastUserLocation.userId);
 
-        verify(gpsUtilMock, Mockito.times(0)).getUserLocation(user1.getUserId());
+        verify(gpsUtilAPIRequestServiceMock, Mockito.times(0)).getUserLocation(user1.getUserId());
     }
 
     @Test
     public void getUserLocation_WithoutExistingVisitedLocations() {
 
-        VisitedLocation visitedLocation = new VisitedLocation(
+        VisitedLocationBean visitedLocation = new VisitedLocationBean(
                 user1.getUserId(),
-                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                new LocationBean(PARIS_LATITUDE, PARIS_LONGITUDE),
                 Date.from(Instant.now()));
-        when(gpsUtilMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation);
+        when(gpsUtilAPIRequestServiceMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation);
 
         tourGuideService.addUser(user1);
-        VisitedLocation currentUserLocation = tourGuideService.getUserLocation(user1.getUserName());
+        VisitedLocationBean currentUserLocation = tourGuideService.getUserLocation(user1.getUserName());
 
         assertEquals(visitedLocation, currentUserLocation);
         assertEquals(user1.getUserId(), currentUserLocation.userId);
 
-        verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user1.getUserId());
+        verify(gpsUtilAPIRequestServiceMock, Mockito.times(1)).getUserLocation(user1.getUserId());
     }
 
     @Test
@@ -181,34 +186,34 @@ public class TestTourGuideService {
     @Test
     public void trackUser() {
 
-        VisitedLocation visitedLocation = new VisitedLocation(
+        VisitedLocationBean visitedLocation = new VisitedLocationBean(
                 user1.getUserId(),
-                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                new LocationBean(PARIS_LATITUDE, PARIS_LONGITUDE),
                 Date.from(Instant.now()));
-        when(gpsUtilMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation);
+        when(gpsUtilAPIRequestServiceMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation);
 
-        VisitedLocation trackedLocation = tourGuideService.trackUserLocation(user1);
+        VisitedLocationBean trackedLocation = tourGuideService.trackUserLocation(user1);
 
         assertEquals(visitedLocation, trackedLocation);
         assertEquals(user1.getUserId(), trackedLocation.userId);
 
-        verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user1.getUserId());
+        verify(gpsUtilAPIRequestServiceMock, Mockito.times(1)).getUserLocation(user1.getUserId());
     }
 
     @Test
     public void trackUserLocationForUserList() {
 
-        VisitedLocation visitedLocation1 = new VisitedLocation(
+        VisitedLocationBean visitedLocation1 = new VisitedLocationBean(
                 user1.getUserId(),
-                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                new LocationBean(PARIS_LATITUDE, PARIS_LONGITUDE),
                 Date.from(Instant.now()));
-        when(gpsUtilMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation1);
+        when(gpsUtilAPIRequestServiceMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation1);
 
-        VisitedLocation visitedLocation2 = new VisitedLocation(
+        VisitedLocationBean visitedLocation2 = new VisitedLocationBean(
                 user2.getUserId(),
-                new Location(TestConstants.NYC_LATITUDE, TestConstants.NYC_LONGITUDE),
+                new LocationBean(NYC_LATITUDE, NYC_LONGITUDE),
                 Date.from(Instant.now()));
-        when(gpsUtilMock.getUserLocation(user2.getUserId())).thenReturn(visitedLocation2);
+        when(gpsUtilAPIRequestServiceMock.getUserLocation(user2.getUserId())).thenReturn(visitedLocation2);
 
         List<User> allUsers = new ArrayList<>();
         allUsers.add(user1);
@@ -218,8 +223,8 @@ public class TestTourGuideService {
         assertEquals(visitedLocation1, user1.getLastVisitedLocation());
         assertEquals(visitedLocation2, user2.getLastVisitedLocation());
 
-        verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user1.getUserId());
-        verify(gpsUtilMock, Mockito.times(1)).getUserLocation(user2.getUserId());
+        verify(gpsUtilAPIRequestServiceMock, Mockito.times(1)).getUserLocation(user1.getUserId());
+        verify(gpsUtilAPIRequestServiceMock, Mockito.times(1)).getUserLocation(user2.getUserId());
     }
 
     @Test
@@ -227,14 +232,14 @@ public class TestTourGuideService {
 
         tourGuideService.addUser(user1);
 
-        VisitedLocation visitedLocation = new VisitedLocation(
+        VisitedLocationBean visitedLocation = new VisitedLocationBean(
                 user1.getUserId(),
-                new Location(TestConstants.PARIS_LATITUDE, TestConstants.PARIS_LONGITUDE),
+                new LocationBean(PARIS_LATITUDE, PARIS_LONGITUDE),
                 Date.from(Instant.now()));
         user1.addToVisitedLocations(visitedLocation);
-        when(gpsUtilMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation);
+        when(gpsUtilAPIRequestServiceMock.getUserLocation(user1.getUserId())).thenReturn(visitedLocation);
 
-        List<Attraction> attractionList = new ArrayList<>();
+        List<AttractionBean> attractionList = new ArrayList<>();
         attractionList.add(attraction1);
         attractionList.add(attraction2);
         attractionList.add(attraction3);
@@ -242,10 +247,10 @@ public class TestTourGuideService {
         attractionList.add(attraction5);
         attractionList.add(attraction6);
 
-        when(gpsUtilMock.getAttractions()).thenReturn(attractionList);
+        when(gpsUtilAPIRequestServiceMock.getAttractions()).thenReturn(attractionList);
 
         when(rewardsServiceMock.getDistance(attraction1,
-                visitedLocation.location)).thenReturn(TestConstants.DISTANCE_NYC_TO_PARIS_IN_MI);
+                visitedLocation.location)).thenReturn(DISTANCE_NYC_TO_PARIS_IN_MI);
         when(rewardsServiceMock.getDistance(attraction2,
                 visitedLocation.location)).thenReturn(Double.valueOf(0));
         when(rewardsServiceMock.getDistance(attraction3,
@@ -253,9 +258,9 @@ public class TestTourGuideService {
         when(rewardsServiceMock.getDistance(attraction4,
                 visitedLocation.location)).thenReturn(Double.valueOf(0));
         when(rewardsServiceMock.getDistance(attraction5,
-                visitedLocation.location)).thenReturn(TestConstants.DISTANCE_LILLE_TO_PARIS_IN_MI);
+                visitedLocation.location)).thenReturn(DISTANCE_LILLE_TO_PARIS_IN_MI);
         when(rewardsServiceMock.getDistance(attraction6,
-                visitedLocation.location)).thenReturn(TestConstants.DISTANCE_LILLE_TO_PARIS_IN_MI);
+                visitedLocation.location)).thenReturn(DISTANCE_LILLE_TO_PARIS_IN_MI);
 
         when(rewardsServiceMock.getRewardPoints(any(), any())).thenReturn(100);
 
@@ -266,7 +271,7 @@ public class TestTourGuideService {
         assertEquals(0D, nearByAttractionDtoList.get(0).getAttractionDistanceFromUser());
         assertEquals(100, nearByAttractionDtoList.get(0).getAttractionRewardsPoint());
 
-        verify(gpsUtilMock, Mockito.times(1)).getAttractions();
+        verify(gpsUtilAPIRequestServiceMock, Mockito.times(1)).getAttractions();
         verify(rewardsServiceMock, Mockito.atLeast(6)).getDistance(any(), any());
         verify(rewardsServiceMock, Mockito.times(5)).getRewardPoints(any(), any());
 
@@ -319,13 +324,13 @@ public class TestTourGuideService {
 
     @Test
     void getAllCurrentLocations() {
-        VisitedLocation visitedLocation1 = new VisitedLocation(user1.getUserId(), attraction1, new Date());
-        VisitedLocation visitedLocation2 = new VisitedLocation(user1.getUserId(), attraction2, new Date());
+        VisitedLocationBean visitedLocation1 = new VisitedLocationBean(user1.getUserId(), attraction1, new Date());
+        VisitedLocationBean visitedLocation2 = new VisitedLocationBean(user1.getUserId(), attraction2, new Date());
         user1.addToVisitedLocations(visitedLocation1);
         user1.addToVisitedLocations(visitedLocation2);
         tourGuideService.addUser(user1);
 
-        VisitedLocation visitedLocation3 = new VisitedLocation(user1.getUserId(), attraction3, new Date());
+        VisitedLocationBean visitedLocation3 = new VisitedLocationBean(user1.getUserId(), attraction3, new Date());
         user2.addToVisitedLocations(visitedLocation3);
         tourGuideService.addUser(user2);
 
