@@ -1,13 +1,10 @@
-package tourGuide;
+package tourGuide.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
-import tourGuide.service.RewardsService;
-import tourGuide.service.TourGuideService;
-import tourGuide.service.UserPreferencesService;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;

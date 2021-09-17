@@ -1,4 +1,4 @@
-package tourGuide;
+package tourGuide.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
