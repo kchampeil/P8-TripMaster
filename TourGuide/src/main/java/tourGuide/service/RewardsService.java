@@ -2,11 +2,11 @@ package tourGuide.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import rewardCentral.RewardCentral;
 import tourGuide.model.AttractionBean;
 import tourGuide.model.LocationBean;
 import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.IRewardCentralAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
@@ -30,13 +30,14 @@ public class RewardsService {
     private static final int ATTRACTION_PROXIMITY_RANGE = 200;
 
     private final IGpsUtilAPIRequestService gpsUtilAPIRequestService;
-    private final RewardCentral rewardsCentral;
+    private final IRewardCentralAPIRequestService rewardCentralAPIRequestService;
 
     private final ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(60);
 
-    public RewardsService(IGpsUtilAPIRequestService gpsUtilAPIRequestService, RewardCentral rewardCentral) {
+    public RewardsService(IGpsUtilAPIRequestService gpsUtilAPIRequestService,
+                          IRewardCentralAPIRequestService rewardCentralAPIRequestService) {
         this.gpsUtilAPIRequestService = gpsUtilAPIRequestService;
-        this.rewardsCentral = rewardCentral;
+        this.rewardCentralAPIRequestService = rewardCentralAPIRequestService;
     }
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -107,7 +108,7 @@ public class RewardsService {
     }
 
     public int getRewardPoints(AttractionBean attraction, UUID userId) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, userId);
+        return rewardCentralAPIRequestService.getAttractionRewardPoints(attraction.attractionId, userId);
     }
 
     public double getDistance(LocationBean loc1, LocationBean loc2) {

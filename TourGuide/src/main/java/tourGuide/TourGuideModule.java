@@ -1,8 +1,6 @@
 package tourGuide;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import rewardCentral.RewardCentral;
 
 @Configuration
 public class TourGuideModule {
@@ -24,10 +22,13 @@ public class TourGuideModule {
 
 	 */
 
+    /*TODEL
     @Bean
     public RewardCentral getRewardCentral() {
         return new RewardCentral();
     }
+
+     */
 
 /*TODEL
     @Bean

@@ -5,10 +5,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import rewardCentral.RewardCentral;
 import tourGuide.model.AttractionBean;
 import tourGuide.model.VisitedLocationBean;
-import tourGuide.proxies.GpsUtilAPIProxy;
+import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.IRewardCentralAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
@@ -37,10 +37,10 @@ public class TestRewardsService {
     private RewardsService rewardsService;
 
     @MockBean
-    private GpsUtilAPIProxy gpsUtilAPIProxyMock;
+    private IGpsUtilAPIRequestService gpsUtilAPIRequestService;
 
     @MockBean
-    private RewardCentral rewardCentralMock;
+    private IRewardCentralAPIRequestService rewardCentralAPIRequestServiceMock;
 
     @MockBean
     private TourGuideService tourGuideServiceMock;
@@ -63,8 +63,8 @@ public class TestRewardsService {
 
         user.addToVisitedLocations(new VisitedLocationBean(user.getUserId(), attraction2, new Date()));
 
-        when(gpsUtilAPIProxyMock.getAttractions()).thenReturn(attractionList);
-        when(rewardCentralMock.getAttractionRewardPoints(any(UUID.class), any(UUID.class))).thenReturn(100);
+        when(gpsUtilAPIRequestService.getAttractions()).thenReturn(attractionList);
+        when(rewardCentralAPIRequestServiceMock.getAttractionRewardPoints(any(UUID.class), any(UUID.class))).thenReturn(100);
 
         rewardsService.calculateRewards(user);
         List<UserReward> userRewards = user.getUserRewards();
@@ -74,8 +74,8 @@ public class TestRewardsService {
         assertEquals(attraction2.attractionName, userRewards.get(0).attraction.attractionName);
         assertEquals(100, userRewards.get(0).getRewardPoints());
 
-        verify(gpsUtilAPIProxyMock, Mockito.times(1)).getAttractions();
-        verify(rewardCentralMock, Mockito.times(1))
+        verify(gpsUtilAPIRequestService, Mockito.times(1)).getAttractions();
+        verify(rewardCentralAPIRequestServiceMock, Mockito.times(1))
                 .getAttractionRewardPoints(any(UUID.class), any(UUID.class));
 
     }
@@ -117,8 +117,8 @@ public class TestRewardsService {
         allUsers.add(user1);
         allUsers.add(user2);
 
-        when(gpsUtilAPIProxyMock.getAttractions()).thenReturn(attractionList);
-        when(rewardCentralMock.getAttractionRewardPoints(any(UUID.class), any(UUID.class))).thenReturn(100);
+        when(gpsUtilAPIRequestService.getAttractions()).thenReturn(attractionList);
+        when(rewardCentralAPIRequestServiceMock.getAttractionRewardPoints(any(UUID.class), any(UUID.class))).thenReturn(100);
 
         rewardsService.calculateRewardsForUserList(allUsers);
 
@@ -128,8 +128,8 @@ public class TestRewardsService {
             assertEquals(100, userRewards.get(0).getRewardPoints());
         }
 
-        verify(gpsUtilAPIProxyMock, Mockito.times(allUsers.size())).getAttractions();
-        verify(rewardCentralMock, Mockito.times(allUsers.size()))
+        verify(gpsUtilAPIRequestService, Mockito.times(allUsers.size())).getAttractions();
+        verify(rewardCentralAPIRequestServiceMock, Mockito.times(allUsers.size()))
                 .getAttractionRewardPoints(any(UUID.class), any(UUID.class));
 
     }

@@ -3,10 +3,10 @@ package tourGuide.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.ProviderBean;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.IRewardCentralAPIRequestService;
 import tourGuide.service.contracts.ITripPricerAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
@@ -24,10 +24,13 @@ public class ITRewardsService {
     @Autowired
     private ITripPricerAPIRequestService tripPricerAPIRequestService;
 
+    @Autowired
+    private IRewardCentralAPIRequestService rewardCentralAPIRequestService;
+
     @Test
     public void nearAllAttractions() {
 
-        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
         InternalTestHelper.setInternalUserNumber(1);
@@ -45,7 +48,7 @@ public class ITRewardsService {
     @Test
     public void getTripDealsUsingUserPreferences() {
 
-        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService,
                 tripPricerAPIRequestService, new UserPreferencesService());

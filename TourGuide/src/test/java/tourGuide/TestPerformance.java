@@ -4,7 +4,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionBean;
 import tourGuide.model.VisitedLocationBean;
@@ -12,6 +11,7 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.UserPreferencesService;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.IRewardCentralAPIRequestService;
 import tourGuide.service.contracts.ITripPricerAPIRequestService;
 import tourGuide.user.User;
 
@@ -49,10 +49,13 @@ public class TestPerformance {
     @Autowired
     private ITripPricerAPIRequestService tripPricerAPIRequestService;
 
+    @Autowired
+    private IRewardCentralAPIRequestService rewardCentralAPIRequestService;
+
     @Disabled
     @Test
     public void highVolumeTrackLocation() {
-        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(1000);
         TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService,
@@ -77,7 +80,7 @@ public class TestPerformance {
     @Disabled
     @Test
     public void highVolumeGetRewards() {
-        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         InternalTestHelper.setInternalUserNumber(100000);
