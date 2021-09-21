@@ -8,15 +8,15 @@ import tourGuide.dto.NearByAttractionDto;
 import tourGuide.dto.UserPreferencesDto;
 import tourGuide.model.AttractionBean;
 import tourGuide.model.LocationBean;
+import tourGuide.model.ProviderBean;
 import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.ITripPricerAPIRequestService;
 import tourGuide.service.contracts.IUserPreferencesService;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 import tourGuide.user.UserReward;
-import tripPricer.Provider;
-import tripPricer.TripPricer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,7 +38,7 @@ public class TourGuideService {
     private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
     private final IGpsUtilAPIRequestService gpsUtilAPIRequestService;
     private final RewardsService rewardsService;
-    private final TripPricer tripPricer;
+    private final ITripPricerAPIRequestService tripPricerAPIRequestService;
     private final IUserPreferencesService userPreferencesService;
     public final Tracker tracker;
     boolean testMode = true;
@@ -52,11 +52,13 @@ public class TourGuideService {
     // but for testing purposes internal users are provided and stored in memory
     private final Map<String, User> internalUserMap = new HashMap<>();
 
-    public TourGuideService(IGpsUtilAPIRequestService gpsUtilAPIRequestService, RewardsService rewardsService,
-                            TripPricer tripPricer, IUserPreferencesService userPreferencesService) {
+    public TourGuideService(IGpsUtilAPIRequestService gpsUtilAPIRequestService,
+                            RewardsService rewardsService,
+                            ITripPricerAPIRequestService tripPricerAPIRequestService,
+                            IUserPreferencesService userPreferencesService) {
         this.gpsUtilAPIRequestService = gpsUtilAPIRequestService;
         this.rewardsService = rewardsService;
-        this.tripPricer = tripPricer;
+        this.tripPricerAPIRequestService = tripPricerAPIRequestService;
         this.userPreferencesService = userPreferencesService;
 
         if (testMode) {
@@ -95,17 +97,24 @@ public class TourGuideService {
         }
     }
 
-    public List<Provider> getTripDeals(String userName) {
+    public List<ProviderBean> getTripDeals(String userName) {
         User user = this.getUser(userName);
 
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
 
-        List<Provider> providers = tripPricer.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
+        List<ProviderBean> providers = tripPricerAPIRequestService.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
     }
 
+    /**
+     * track user's location by getting his current location, adding it to his visited location list
+     * and calculating corresponding rewards
+     *
+     * @param user the user whom we want to track the location
+     * @return the current visited location of the user
+     */
     public VisitedLocationBean trackUserLocation(User user) {
         VisitedLocationBean visitedLocation = gpsUtilAPIRequestService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);

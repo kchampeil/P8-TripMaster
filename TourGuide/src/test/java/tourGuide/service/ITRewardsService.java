@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.ProviderBean;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.ITripPricerAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
-import tripPricer.Provider;
-import tripPricer.TripPricer;
 
 import java.util.List;
 
@@ -21,6 +21,9 @@ public class ITRewardsService {
     @Autowired
     private IGpsUtilAPIRequestService gpsUtilAPIRequestService;
 
+    @Autowired
+    private ITripPricerAPIRequestService tripPricerAPIRequestService;
+
     @Test
     public void nearAllAttractions() {
 
@@ -28,7 +31,9 @@ public class ITRewardsService {
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
         InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService, new TripPricer(), new UserPreferencesService());
+        TourGuideService tourGuideService =
+                new TourGuideService(gpsUtilAPIRequestService, rewardsService,
+                        tripPricerAPIRequestService, new UserPreferencesService());
 
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
         List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0).getUserName());
@@ -42,11 +47,12 @@ public class ITRewardsService {
 
         RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, new RewardCentral());
         InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService, new TripPricer(), new UserPreferencesService());
+        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService,
+                tripPricerAPIRequestService, new UserPreferencesService());
 
         User user = tourGuideService.getAllUsers().get(0);
 
-        List<Provider> providers = tourGuideService.getTripDeals(user.getUserName());
+        List<ProviderBean> providers = tourGuideService.getTripDeals(user.getUserName());
 
         assertEquals(5, providers.size());
     }

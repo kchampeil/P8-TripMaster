@@ -3,7 +3,6 @@ package tourGuide;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rewardCentral.RewardCentral;
-import tripPricer.TripPricer;
 
 @Configuration
 public class TourGuideModule {
@@ -30,9 +29,12 @@ public class TourGuideModule {
         return new RewardCentral();
     }
 
+/*TODEL
     @Bean
     public TripPricer getTripPricer() {
         return new TripPricer();
     }
+
+ */
 
 }

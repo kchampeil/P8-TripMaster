@@ -12,12 +12,12 @@ import tourGuide.dto.UserPreferencesDto;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionBean;
 import tourGuide.model.LocationBean;
+import tourGuide.model.ProviderBean;
 import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.ITripPricerAPIRequestService;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
-import tripPricer.Provider;
-import tripPricer.TripPricer;
 
 import javax.money.Monetary;
 import java.time.Instant;
@@ -55,7 +55,7 @@ public class TestTourGuideService {
     private RewardsService rewardsServiceMock;
 
     @MockBean
-    private TripPricer tripPricerMock;
+    private ITripPricerAPIRequestService tripPricerAPIRequestServiceMock;
 
     @MockBean
     private UserPreferencesService userPreferencesServiceMock;
@@ -112,7 +112,7 @@ public class TestTourGuideService {
     @BeforeEach
     public void setupPerTest() {
         InternalTestHelper.setInternalUserNumber(0);
-        tourGuideService = new TourGuideService(gpsUtilAPIRequestServiceMock, rewardsServiceMock, tripPricerMock, userPreferencesServiceMock);
+        tourGuideService = new TourGuideService(gpsUtilAPIRequestServiceMock, rewardsServiceMock, tripPricerAPIRequestServiceMock, userPreferencesServiceMock);
         tourGuideService.tracker.stopTracking();
 
         user1 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -279,16 +279,16 @@ public class TestTourGuideService {
 
         tourGuideService.addUser(user1);
 
-        List<Provider> expectedProviderList = new ArrayList<>();
-        expectedProviderList.add(new Provider(user1.getUserId(), "Expected Provider1", 123.45));
-        expectedProviderList.add(new Provider(user1.getUserId(), "Expected Provider2", 543.32));
-        when(tripPricerMock.getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt()))
+        List<ProviderBean> expectedProviderList = new ArrayList<>();
+        expectedProviderList.add(new ProviderBean(user1.getUserId(), "Expected Provider1", 123.45));
+        expectedProviderList.add(new ProviderBean(user1.getUserId(), "Expected Provider2", 543.32));
+        when(tripPricerAPIRequestServiceMock.getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(expectedProviderList);
 
-        List<Provider> providers = tourGuideService.getTripDeals(user1.getUserName());
+        List<ProviderBean> providers = tourGuideService.getTripDeals(user1.getUserName());
 
         assertEquals(expectedProviderList.size(), providers.size());
-        verify(tripPricerMock, Mockito.times(1))
+        verify(tripPricerAPIRequestServiceMock, Mockito.times(1))
                 .getPrice(anyString(), any(UUID.class), anyInt(), anyInt(), anyInt(), anyInt());
     }
 

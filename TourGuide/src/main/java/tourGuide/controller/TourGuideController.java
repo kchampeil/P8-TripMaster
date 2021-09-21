@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import tourGuide.dto.UserPreferencesDto;
+import tourGuide.model.ProviderBean;
 import tourGuide.model.VisitedLocationBean;
 import tourGuide.service.TourGuideService;
-import tripPricer.Provider;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -87,7 +87,7 @@ public class TourGuideController {
     @ApiOperation(value = "Get a list of of trip deals (providers) for a given user")
     @GetMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
-        List<Provider> providers = tourGuideService.getTripDeals(userName);
+        List<ProviderBean> providers = tourGuideService.getTripDeals(userName);
         return JsonStream.serialize(providers);
     }
 

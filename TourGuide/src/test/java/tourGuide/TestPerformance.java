@@ -12,8 +12,8 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.UserPreferencesService;
 import tourGuide.service.contracts.IGpsUtilAPIRequestService;
+import tourGuide.service.contracts.ITripPricerAPIRequestService;
 import tourGuide.user.User;
-import tripPricer.TripPricer;
 
 import java.util.Date;
 import java.util.List;
@@ -46,6 +46,9 @@ public class TestPerformance {
     @Autowired
     private IGpsUtilAPIRequestService gpsUtilAPIRequestService;
 
+    @Autowired
+    private ITripPricerAPIRequestService tripPricerAPIRequestService;
+
     @Disabled
     @Test
     public void highVolumeTrackLocation() {
@@ -53,7 +56,7 @@ public class TestPerformance {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(1000);
         TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService,
-                new TripPricer(), new UserPreferencesService());
+                tripPricerAPIRequestService, new UserPreferencesService());
 
         List<User> allUsers = tourGuideService.getAllUsers();
 
@@ -81,7 +84,8 @@ public class TestPerformance {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService, new TripPricer(), new UserPreferencesService());
+        TourGuideService tourGuideService =
+                new TourGuideService(gpsUtilAPIRequestService, rewardsService, tripPricerAPIRequestService, new UserPreferencesService());
 
         AttractionBean attraction = gpsUtilAPIRequestService.getAttractions().get(0);
         List<User> allUsers = tourGuideService.getAllUsers();
