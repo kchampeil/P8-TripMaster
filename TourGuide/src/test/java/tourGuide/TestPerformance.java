@@ -4,6 +4,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionBean;
 import tourGuide.model.VisitedLocationBean;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
 public class TestPerformance {
 
     /*
@@ -83,7 +85,7 @@ public class TestPerformance {
         RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalTestHelper.setInternalUserNumber(100000);
+        InternalTestHelper.setInternalUserNumber(1000);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
