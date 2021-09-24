@@ -26,6 +26,7 @@ public class InternalTestingInitializationService {
      * Initialization of users for internal testing
      *
      * @param internalUserMap map of userName/user
+     * @return a map of userName, user
      */
     public static Map<String, User> initializeInternalUsers(Map<String, User> internalUserMap) {
         IntStream.range(0, InternalTestHelper.getInternalUserNumber()).forEach(i -> {

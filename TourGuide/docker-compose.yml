@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+
+  gps-util-api:
+    image: gps-util-api:latest
+    ports:
+      - "9001:9001"
+
+  trip-pricer-api:
+    image: trip-pricer-api:latest
+    ports:
+      - "9002:9002"
+
+  reward-central-api:
+    image: reward-central-api:latest
+    ports:
+      - "9003:9003"
+
+  tour-guide:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tour-guide:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
+    depends_on:
+      - gps-util-api
+      - trip-pricer-api
+      - reward-central-api
