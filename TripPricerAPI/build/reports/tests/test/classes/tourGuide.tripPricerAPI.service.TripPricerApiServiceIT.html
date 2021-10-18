@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - TripPricerApiServiceIT</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>TripPricerApiServiceIT</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/tourGuide.tripPricerAPI.service.html">tourGuide.tripPricerAPI.service</a> &gt; TripPricerApiServiceIT</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">2</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.386s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">getPrice()</td>
+<td class="success">0.359s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">getProviderName()</td>
+<td class="success">0.027s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>2021-09-23 14:31:43.355  INFO 21864 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Neither @ContextConfiguration nor @ContextHierarchy found for test class [tourGuide.tripPricerAPI.service.TripPricerApiServiceIT], using SpringBootContextLoader
+2021-09-23 14:31:43.357  INFO 21864 --- [    Test worker] o.s.t.c.support.AbstractContextLoader    : Could not detect default resource locations for test class [tourGuide.tripPricerAPI.service.TripPricerApiServiceIT]: no resource found for suffixes {-context.xml, Context.groovy}.
+2021-09-23 14:31:43.357  INFO 21864 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [tourGuide.tripPricerAPI.service.TripPricerApiServiceIT]: TripPricerApiServiceIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2021-09-23 14:31:43.386  INFO 21864 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration tourGuide.tripPricerAPI.TripPricerApiApplication for test class tourGuide.tripPricerAPI.service.TripPricerApiServiceIT
+2021-09-23 14:31:43.397  INFO 21864 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.event.ApplicationEventsTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]
+2021-09-23 14:31:43.400  INFO 21864 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@151b7c03, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@14a28980, org.springframework.test.context.event.ApplicationEventsTestExecutionListener@6e71c9dc, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@31d4c6c9, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@7fe14f94, org.springframework.test.context.support.DirtiesContextTestExecutionListener@7f8f2761, org.springframework.test.context.event.EventPublishingTestExecutionListener@1f502e65, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@8a541c8, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@7d4d32a7, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@7b7fa640, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@65c29c4c, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener@474b3a3d, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@5387e079]
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.5.4)
+
+2021-09-23 14:31:43.493  INFO 21864 --- [    Test worker] t.t.service.TripPricerApiServiceIT       : Starting TripPricerApiServiceIT using Java 1.8.0_151 on PO531436 with PID 21864 (started by S562587 in C:\Git\P8-TripPricerAPI)
+2021-09-23 14:31:43.494 DEBUG 21864 --- [    Test worker] t.t.service.TripPricerApiServiceIT       : Running with Spring Boot v2.5.4, Spring v5.3.9
+2021-09-23 14:31:43.498  INFO 21864 --- [    Test worker] t.t.service.TripPricerApiServiceIT       : No active profile set, falling back to default profiles: default
+2021-09-23 14:31:47.913  INFO 21864 --- [    Test worker] t.t.service.TripPricerApiServiceIT       : Started TripPricerApiServiceIT in 4.508 seconds (JVM running for 15.025)
+2021-09-23 14:31:47.933 DEBUG 21864 --- [    Test worker] t.t.service.TripPricerApiService         : Service getPrice called
+2021-09-23 14:31:47.958 DEBUG 21864 --- [    Test worker] t.t.service.TripPricerApiService         : Service getPrice called
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 7.2</a> at 23 sept. 2021 14:31:55</p>
+</div>
+</div>
+</body>
+</html>
