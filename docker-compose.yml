@@ -19,8 +19,8 @@ services:
 
   tour-guide:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: TourGuide
+      dockerfile: TourGuide/Dockerfile
     image: tour-guide:latest
     ports:
       - "8080:8080"

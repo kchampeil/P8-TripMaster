@@ -1,6 +1,7 @@
 package tourGuide;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,12 +56,12 @@ public class TestPerformance {
     @Autowired
     private IRewardCentralAPIRequestService rewardCentralAPIRequestService;
 
-    //@Disabled
+    @Disabled
     @Test
     public void highVolumeTrackLocation() {
         RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(100);
+        InternalTestHelper.setInternalUserNumber(50000);
         TourGuideService tourGuideService = new TourGuideService(gpsUtilAPIRequestService, rewardsService,
                 tripPricerAPIRequestService, new UserPreferencesService());
 
@@ -80,13 +81,13 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    //@Disabled
+    @Disabled
     @Test
     public void highVolumeGetRewards() {
         RewardsService rewardsService = new RewardsService(gpsUtilAPIRequestService, rewardCentralAPIRequestService);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalTestHelper.setInternalUserNumber(100);
+        InternalTestHelper.setInternalUserNumber(100000);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
